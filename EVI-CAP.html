@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVI-Cap | Protección Vial Activa IIoT</title>
+    
+    <!-- Tailwind CSS (Framework de diseño) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js (Para el gráfico de telemetría) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Model-Viewer (Motor 3D de Google) -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+    <style>
+        /* Animación para la alerta de emergencia */
+        @keyframes pulse-red {
+            0%, 100% { background-color: rgba(220, 38, 38, 1); box-shadow: 0 0 20px rgba(220, 38, 38, 0.5); }
+            50% { background-color: rgba(153, 27, 27, 1); box-shadow: 0 0 40px rgba(220, 38, 38, 0.8); }
+        }
+        .alerta-activa { animation: pulse-red 0.6s infinite; }
+        
+        /* Estilos personalizados para el renderizador 3D */
+        model-viewer {
+            width: 100%;
+            height: 500px;
+            background-color: transparent;
+            --poster-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans antialiased selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- BARRA DE NAVEGACIÓN -->
+    <nav class="fixed w-full z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800 transition-all">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-black px-3 py-1 rounded shadow-lg text-xl">EVI-CAP</div>
+                <span class="text-xs font-bold tracking-widest text-slate-400 hidden md:block uppercase">Proyecto IIoT</span>
+            </div>
+            <div class="space-x-6 text-sm font-semibold">
+                <a href="#hardware" class="text-slate-300 hover:text-amber-400 transition">Hardware 3D</a>
+                <a href="#telemetria" class="text-slate-300 hover:text-amber-400 transition">Live Dashboard</a>
+                <a href="#equipo" class="text-slate-300 hover:text-amber-400 transition">Equipo</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION (PITCH + VISUALIZADOR 3D) -->
+    <section id="hardware" class="pt-32 pb-16 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-screen">
+        <div class="space-y-8 z-10">
+            <div class="inline-block border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 rounded-full text-amber-400 text-xs font-bold tracking-widest uppercase">
+                Innovación INNSPIRA 2026
+            </div>
+            <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight leading-tight">
+                El primer <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600">Cono Centinela</span> para carreteras.
+            </h1>
+            <p class="text-lg text-slate-400 leading-relaxed max-w-xl">
+                EVI-Cap se acopla a la infraestructura vial existente. Impulsado por un Radar Doppler HB100 y procesamiento Edge en ESP32-S3, detecta invasiones vehiculares a través de la niebla y alerta a los operarios en menos de 25 milisegundos mediante pulseras hápticas.
+            </p>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="border border-slate-800 bg-slate-900/50 p-4 rounded-2xl backdrop-blur">
+                    <div class="text-3xl font-black text-slate-100 mb-1">10.5 GHz</div>
+                    <div class="text-xs text-slate-400 font-medium">Banda X Radar Doppler</div>
+                </div>
+                <div class="border border-slate-800 bg-slate-900/50 p-4 rounded-2xl backdrop-blur">
+                    <div class="text-3xl font-black text-slate-100 mb-1">&lt; 25 ms</div>
+                    <div class="text-xs text-slate-400 font-medium">Latencia Crítica ESP-NOW</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISUALIZADOR 3D INTERACTIVO -->
+        <div class="relative w-full flex justify-center items-center bg-gradient-to-b from-slate-900 to-slate-950 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden p-4">
+            <div class="absolute top-4 left-4 text-xs font-bold text-slate-500 tracking-widest uppercase z-10 flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                </span>
+                Hardware Interactivo (Arrastra para rotar)
+            </div>
+            
+            <!-- MODELO 3D (Usa un modelo de prueba mientras exportan el suyo) -->
+            <model-viewer 
+                src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
+                alt="Prototipo CAD de EVI-Cap"
+                auto-rotate
+                camera-controls
+                rotation-per-second="30deg"
+                interaction-prompt="auto"
+                shadow-intensity="1"
+                environment-image="neutral"
+                exposure="0.8">
+            </model-viewer>
+            <!-- Nota para el equipo: Reemplazar el link 'src' por 'assets/evi-cap.glb' cuando el compañero CAD lo termine -->
+        </div>
+    </section>
+
+    <!-- SECCIÓN TELEMETRÍA (SIMULADOR EN VIVO) -->
+    <section id="telemetria" class="py-20 border-t border-slate-800 bg-slate-900/20">
+        <div class="max-w-7xl mx-auto px-6 space-y-10">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-slate-800 pb-6">
+                <div>
+                    <h2 class="text-3xl font-bold mb-2">Simulador Digital Gemelo</h2>
+                    <p class="text-slate-400">Panel de control de autopista conectado vía LoRaWAN a la flota EVI-Cap.</p>
+                </div>
+                <!-- Banner de Estado de Emergencia -->
+                <div id="status-panel" class="bg-emerald-500 text-slate-950 px-6 py-3 rounded-xl font-black text-sm tracking-widest flex items-center gap-3 transition-all duration-300 uppercase shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span id="status-text">Operación Segura</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- KPIs Panel Lateral -->
+                <div class="space-y-4 lg:col-span-1">
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between h-32">
+                        <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Flujo Vehicular Total</span>
+                        <span class="text-4xl font-mono font-bold text-slate-100" id="car-count">1,248</span>
+                    </div>
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between h-32">
+                        <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Potencia Inyectada (Solar)</span>
+                        <span class="text-4xl font-mono font-bold text-amber-400">4.1W</span>
+                    </div>
+                    
+                    <!-- Botón Gatillo del Simulador -->
+                    <button onclick="triggerSimulatedInvasion()" class="w-full mt-4 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-red-900/50 transition-all active:scale-95 flex items-center justify-center gap-2 group">
+                        <svg class="w-6 h-6 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        SIMULAR IMPACTO
+                    </button>
+                </div>
+
+                <!-- Gráfico Chart.js -->
+                <div class="lg:col-span-3 bg-slate-900 p-6 rounded-2xl border border-slate-800 relative h-96">
+                    <div class="absolute top-6 left-6 text-xs text-slate-400 font-bold uppercase tracking-widest z-10">Muestreo Radar Doppler (Tiempo Real)</div>
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN EQUIPO -->
+    <section id="equipo" class="py-20">
+        <div class="max-w-7xl mx-auto px-6 text-center space-y-12">
+            <div>
+                <h2 class="text-3xl font-bold">Arquitectura de Ingeniería</h2>
+                <p class="text-slate-400 mt-2">Desarrollado in-house por estudiantes de la Univ. Católica de Temuco.</p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-left">
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                    <div class="w-12 h-12 bg-amber-500/20 text-amber-500 rounded-xl flex items-center justify-center mb-4"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg></div>
+                    <h3 class="font-bold text-lg">Director IT / Web</h3>
+                    <p class="text-slate-400 text-sm mt-1">Arquitectura Digital, Simulación Wokwi y Cloud.</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                    <div class="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center mb-4"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
+                    <h3 class="font-bold text-lg">Director de Proyecto</h3>
+                    <p class="text-slate-400 text-sm mt-1">Claudio - Viabilidad, Energía ($LiFePO_4$) y Documentación.</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                    <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center mb-4"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+                    <h3 class="font-bold text-lg">Ing. Firmware & RF</h3>
+                    <p class="text-slate-400 text-sm mt-1">C++ Nativo, ESP-NOW y Lazo de Control Doppler.</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                    <div class="w-12 h-12 bg-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center mb-4"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
+                    <h3 class="font-bold text-lg">Manufactura 3D</h3>
+                    <p class="text-slate-400 text-sm mt-1">Modelado CAD, Impresión PETG y Certificación IP67.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCRIPT DE LA SIMULACIÓN -->
+    <script>
+        const ctx = document.getElementById('trafficChart').getContext('2d');
+        let timeLabels = Array(30).fill('');
+        let speedData = Array(30).fill(0);
+        let carsCount = 1248;
+
+        // Gradiente para el gráfico
+        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(245, 158, 11, 0.4)');
+        gradient.addColorStop(1, 'rgba(245, 158, 11, 0.0)');
+
+        const trafficChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: timeLabels,
+                datasets: [{
+                    label: 'Velocidad (km/h)',
+                    data: speedData,
+                    borderColor: '#f59e0b',
+                    backgroundColor: gradient,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 0 },
+                scales: {
+                    y: { min: 0, max: 150, grid: { color: '#1e293b' }, ticks: { color: '#64748b', stepSize: 30 } },
+                    x: { grid: { display: false } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Bucle de lectura simulada del Radar
+        setInterval(() => {
+            let currentStatus = document.getElementById('status-panel').classList.contains('alerta-activa');
+            let nextSpeed;
+
+            if (currentStatus) {
+                // Riesgo Inminente (Auto hacia la berma)
+                nextSpeed = Math.floor(Math.random() * (135 - 110) + 110);
+            } else {
+                // Tráfico regular
+                nextSpeed = Math.random() > 0.8 ? Math.floor(Math.random() * (100 - 70) + 70) : Math.floor(Math.random() * 20);
+                if (nextSpeed > 70) {
+                    carsCount++;
+                    document.getElementById('car-count').innerText = carsCount.toLocaleString();
+                }
+            }
+
+            speedData.shift();
+            speedData.push(nextSpeed);
+            trafficChart.update();
+        }, 300);
+
+        // Disparador de la alerta M2M
+        function triggerSimulatedInvasion() {
+            const panel = document.getElementById('status-panel');
+            const text = document.getElementById('status-text');
+            const chartDataset = trafficChart.data.datasets[0];
+
+            // UI a modo Pánico
+            panel.classList.remove('bg-emerald-500', 'text-slate-950');
+            panel.classList.add('alerta-activa', 'text-white');
+            text.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> ¡ALERTA HÁPTICA ENVIADA!';
+            
+            // Cambiar color del gráfico a Rojo
+            chartDataset.borderColor = '#ef4444';
+            let redGradient = ctx.createLinearGradient(0, 0, 0, 400);
+            redGradient.addColorStop(0, 'rgba(239, 68, 68, 0.4)');
+            redGradient.addColorStop(1, 'rgba(239, 68, 68, 0.0)');
+            chartDataset.backgroundColor = redGradient;
+
+            // Retorno a la normalidad
+            setTimeout(() => {
+                panel.classList.remove('alerta-activa', 'text-white');
+                panel.classList.add('bg-emerald-500', 'text-slate-950');
+                text.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Operación Segura';
+                
+                chartDataset.borderColor = '#f59e0b';
+                chartDataset.backgroundColor = gradient;
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
