@@ -15,7 +15,8 @@
     <!-- Model-Viewer -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
 
-    <link rel="stylesheet" href="dashboard/styles.css">
+    <!-- Ruta aplanada para el CSS -->
+    <link rel="stylesheet" href="styles.css">
 
     <!-- Configuración para emular colores de Apple -->
     <script>
@@ -37,10 +38,16 @@
         }
     </script>
 </head>
-<body class="bg-apple-black text-apple-light font-sans antialiased selection:bg-apple-blue selection:text-white">
+<body class="bg-[#050505] text-apple-light font-sans antialiased selection:bg-apple-blue selection:text-white relative">
+
+    <!-- AMBIENT GLOW BACKGROUND (Iluminación sutil minimalista) -->
+    <div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+        <div class="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] bg-apple-blue/10 blur-[150px] rounded-full mix-blend-screen"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-orange-500/5 blur-[150px] rounded-full mix-blend-screen"></div>
+    </div>
 
     <!-- NAVEGACIÓN APPLE STYLE (Cristal esmerilado, sin bordes toscos) -->
-    <nav class="fixed w-full z-50 bg-apple-black/70 backdrop-blur-lg border-b border-white/10 transition-all">
+    <nav class="fixed w-full z-50 bg-[#050505]/60 backdrop-blur-xl border-b border-white/5 transition-all">
         <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center text-xs font-medium tracking-wide">
             <div class="flex items-center gap-2">
                 <!-- Logotipo minimalista -->
@@ -53,7 +60,7 @@
                 <a href="#prototipo" class="hover:text-white transition">Prototipo</a>
             </div>
             <div>
-                <a href="#prototipo" class="bg-white text-black px-4 py-1.5 rounded-full font-semibold hover:bg-gray-200 transition">Ver Simulador</a>
+                <a href="#prototipo" class="bg-white/90 backdrop-blur-md text-black px-4 py-1.5 rounded-full font-semibold hover:bg-white transition">Ver Estadísticas</a>
             </div>
         </div>
     </nav>
@@ -62,7 +69,7 @@
     <section class="pt-32 pb-10 px-6 max-w-5xl mx-auto flex flex-col items-center text-center min-h-screen">
         <div class="space-y-4 z-10 fade-in mt-10">
             <h2 class="text-orange-500 font-semibold tracking-widest text-sm uppercase">INNSPIRA 2026</h2>
-            <h1 class="text-6xl md:text-8xl font-bold tracking-tighter leading-none">
+            <h1 class="text-6xl md:text-8xl font-bold tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 pb-2">
                 EVI-Cap.
             </h1>
             <h3 class="text-3xl md:text-5xl font-medium tracking-tight text-apple-gray pb-6">
@@ -89,15 +96,15 @@
                 tone-mapping="neutral" 
                 shadow-intensity="1"
                 exposure="1.2"
-                class="w-full h-full outline-none">
+                class="w-full h-full outline-none drop-shadow-2xl">
                 
                 <!-- Barra de carga minimalista superior -->
-                <div class="progress-bar hide absolute top-0 left-0 w-full h-1 bg-neutral-800" slot="progress-bar">
+                <div class="progress-bar hide absolute top-0 left-0 w-full h-1 bg-white/10" slot="progress-bar">
                     <div class="update-bar bg-apple-blue h-full w-0 transition-all duration-200"></div>
                 </div>
                 
                 <!-- Botón AR diseñado al estilo iOS (Flotante abajo a la derecha) -->
-                <button slot="ar-button" id="ar-button" class="absolute bottom-6 right-6 bg-white/80 backdrop-blur-md text-black text-xs font-semibold px-4 py-2 rounded-full shadow-xl border border-white/20 hover:bg-white transition active:scale-95 flex items-center gap-2 z-10">
+                <button slot="ar-button" id="ar-button" class="absolute bottom-6 right-6 bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-2xl hover:bg-white/20 transition active:scale-95 flex items-center gap-2 z-10">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
@@ -106,34 +113,35 @@
                 
                 <!-- Indicador de asistencia técnica para móviles -->
                 <div id="ar-prompt" class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
-                    <img src="https://modelviewer.dev/shared-assets/icons/hand.png" class="w-12 h-12 animate-bounce">
+                    <img src="https://modelviewer.dev/shared-assets/icons/hand.png" class="w-12 h-12 animate-bounce opacity-70">
                 </div>
 
             </model-viewer>
 
             <!-- Texto de asistencia al usuario en computadoras -->
-            <div class="absolute bottom-6 left-6 text-[10px] text-apple-gray tracking-widest uppercase bg-apple-dark/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/5">
+            <div class="absolute bottom-6 left-6 text-[10px] text-apple-gray tracking-widest uppercase bg-black/40 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/10 shadow-lg">
                 ✦ Arrastra para inspeccionar la ingeniería
             </div>
         </div>
+    </section>
 
-    <!-- 1. EL DESAFÍO (Tarjetas limpias con bordes muy redondeados) -->
-    <section id="desafio" class="py-32 bg-apple-black">
+    <!-- 1. EL DESAFÍO (Glassmorphism Cards) -->
+    <section id="desafio" class="py-32 relative">
         <div class="max-w-5xl mx-auto px-6">
             <div class="text-center mb-16 fade-in">
                 <h2 class="text-4xl md:text-6xl font-bold tracking-tighter">Invisible para el clima.<br><span class="text-apple-gray">Fatal para el operario.</span></h2>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                 <!-- Tarjeta 1 -->
-                <div class="bg-apple-dark p-12 rounded-[2.5rem] fade-in delay-100 flex flex-col justify-between min-h-[350px]">
+                <div class="bg-white/[0.02] backdrop-blur-2xl border border-white/5 p-12 rounded-[2.5rem] fade-in delay-100 flex flex-col justify-between min-h-[350px] shadow-2xl transition hover:bg-white/[0.04]">
                     <div>
                         <h4 class="text-2xl font-bold mb-4 tracking-tight">El problema de la seguridad pasiva.</h4>
                         <p class="text-apple-gray font-light text-lg">Los conos y cintas reflectantes dependen de que el conductor los vea. Con niebla densa o lluvia en la Araucanía, el tiempo de reacción humano es de 0 segundos.</p>
                     </div>
                 </div>
                 <!-- Tarjeta 2 -->
-                <div class="bg-apple-dark p-12 rounded-[2.5rem] fade-in delay-200 flex flex-col justify-between min-h-[350px]">
+                <div class="bg-white/[0.02] backdrop-blur-2xl border border-white/5 p-12 rounded-[2.5rem] fade-in delay-200 flex flex-col justify-between min-h-[350px] shadow-2xl transition hover:bg-white/[0.04]">
                     <div>
                         <h4 class="text-2xl font-bold mb-4 tracking-tight">Cámaras que se quedan ciegas.</h4>
                         <p class="text-apple-gray font-light text-lg">La humedad satura los lentes de los sistemas LiDAR u ópticos. EVI-Cap utiliza Radar de Microondas que atraviesa cualquier clima sin degradarse.</p>
@@ -143,161 +151,238 @@
         </div>
     </section>
 
-    <!-- 2. LA SOLUCIÓN (Grid minimalista) -->
-    <section id="solucion" class="py-32">
+   <!-- 2. LA SOLUCIÓN (Grid Premium con Contenedores de Hardware a Gran Escala) -->
+    <section id="solucion" class="py-32 relative">
         <div class="max-w-5xl mx-auto px-6 text-center">
             <h2 class="text-4xl md:text-6xl font-bold tracking-tighter mb-20 fade-in">Tres pasos.<br><span class="text-apple-gray">Milisegundos para reaccionar.</span></h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-apple-dark p-10 rounded-[2rem] fade-in delay-100">
-                    <div class="text-4xl mb-6">📡</div>
-                    <h4 class="font-bold text-xl mb-3">10.5 GHz</h4>
-                    <p class="text-apple-gray text-sm">El Radar Doppler monitorea variaciones de frecuencia a 30 metros de distancia continua.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Tarjeta 1: Radar -->
+                <div class="bg-white/[0.02] backdrop-blur-xl border border-white/5 p-10 rounded-[2.5rem] fade-in delay-100 shadow-2xl flex flex-col items-center transition duration-300 hover:bg-white/[0.04]">
+                    <!-- Cápsula contenedora para el PNG -->
+                    <div class="w-44 h-44 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center mb-8 shadow-inner relative group">
+                        <div class="absolute inset-0 bg-apple-blue/10 blur-xl rounded-full opacity-50 group-hover:opacity-80 transition-opacity"></div>
+                        <!-- Ruta aplanada -->
+                        <img src="radar.png" alt="Módulo Radar HB100" class="h-32 w-32 object-contain relative z-10 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+                    </div>
+                    <h4 class="font-bold text-2xl mb-3 text-white">10.5 GHz</h4>
+                    <p class="text-apple-gray text-base font-light leading-relaxed">El Radar Doppler monitorea variaciones de frecuencia a 30 metros de distancia continua.</p>
                 </div>
-                <div class="bg-apple-dark p-10 rounded-[2rem] fade-in delay-200">
-                    <div class="text-4xl mb-6">🧠</div>
-                    <h4 class="font-bold text-xl mb-3">Edge AI</h4>
-                    <p class="text-apple-gray text-sm">El ESP32-S3 procesa vectores, distinguiendo el tráfico normal de una intrusión en la berma.</p>
+                
+                <!-- Tarjeta 2: ESP32 -->
+                <div class="bg-white/[0.02] backdrop-blur-xl border border-white/5 p-10 rounded-[2.5rem] fade-in delay-200 shadow-2xl flex flex-col items-center transition duration-300 hover:bg-white/[0.04]">
+                    <!-- Cápsula contenedora para el PNG -->
+                    <div class="w-44 h-44 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center mb-8 shadow-inner relative group">
+                        <div class="absolute inset-0 bg-apple-blue/10 blur-xl rounded-full opacity-50 group-hover:opacity-80 transition-opacity"></div>
+                        <!-- Ruta aplanada -->
+                        <img src="esp32.png" alt="Microcontrolador ESP32-S3" class="h-32 w-32 object-contain relative z-10 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+                    </div>
+                    <h4 class="font-bold text-2xl mb-3 text-white">Edge AI</h4>
+                    <p class="text-apple-gray text-base font-light leading-relaxed">El ESP32-S3 procesa vectores, distinguiendo el tráfico normal de una intrusión en la berma.</p>
                 </div>
-                <div class="bg-apple-dark p-10 rounded-[2rem] fade-in delay-300">
-                    <div class="text-4xl mb-6">⚡</div>
-                    <h4 class="font-bold text-xl mb-3">&lt; 25 ms</h4>
-                    <p class="text-apple-gray text-sm">Transmisión peer-to-peer (ESP-NOW) que hace vibrar la pulsera del trabajador al instante.</p>
+                
+                <!-- Tarjeta 3: Pulsera -->
+                <div class="bg-white/[0.02] backdrop-blur-xl border border-white/5 p-10 rounded-[2.5rem] fade-in delay-300 shadow-2xl flex flex-col items-center transition duration-300 hover:bg-white/[0.04]">
+                    <!-- Cápsula contenedora para el PNG -->
+                    <div class="w-44 h-44 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center mb-8 shadow-inner relative group">
+                        <div class="absolute inset-0 bg-orange-500/10 blur-xl rounded-full opacity-50 group-hover:opacity-80 transition-opacity"></div>
+                        <!-- Ruta aplanada -->
+                        <img src="pulsera.png" alt="Pulsera Háptica de Alerta" class="h-32 w-32 object-contain relative z-10 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+                    </div>
+                    <h4 class="font-bold text-2xl mb-3 text-white">&lt; 25 ms</h4>
+                    <p class="text-apple-gray text-base font-light leading-relaxed">Transmisión peer-to-peer (ESP-NOW) que hace vibrar la pulsera del trabajador al instante.</p>
                 </div>
+
             </div>
         </div>
     </section>
-<!-- SECCIÓN SHOWCASE VISUAL (Estilo Apple Full-Width) -->
-    <section class="py-20 bg-apple-black overflow-hidden">
-        <div class="max-w-5xl mx-auto px-6">
+
+ <!-- SECCIÓN SHOWCASE VISUAL (Cinematic Edge-to-Edge Fade) -->
+    <section class="py-20 relative overflow-hidden">
+        
+        <!-- Contenedor Expansivo sin bordes ni esquinas -->
+        <div class="relative w-full min-h-[60vh] md:min-h-[80vh] flex items-end">
             
-            <!-- Contenedor de la Imagen con esquivas muy redondeadas y sombra sutil -->
-            <div class="relative w-full rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl group grid grid-cols-1 items-end min-h-[60vh] md:min-h-[75vh]">
+            <!-- La Imagen de Fondo (Ruta aplanada) -->
+            <img src="render_vial.png" 
+                 alt="EVI-Cap desplegado en ruta concesionaria" 
+                 class="absolute inset-0 w-full h-full object-cover object-center opacity-60">
+            
+            <!-- Degradado Superior (Funde la imagen con la sección de arriba) -->
+            <div class="absolute inset-x-0 top-0 h-32 md:h-48 bg-gradient-to-b from-[#050505] to-transparent z-10"></div>
+            
+            <!-- Degradado Inferior (Funde la imagen hacia abajo y sirve de base oscura para leer el texto) -->
+            <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent z-10"></div>
+            
+            <!-- Degradado Izquierdo (Funde el borde lateral izquierdo) -->
+            <div class="absolute inset-y-0 left-0 w-1/4 md:w-1/3 bg-gradient-to-r from-[#050505] to-transparent z-10"></div>
+            
+            <!-- Degradado Derecho (Funde el borde lateral derecho) -->
+            <div class="absolute inset-y-0 right-0 w-1/4 md:w-1/3 bg-gradient-to-l from-[#050505] to-transparent z-10"></div>
+            
+            <!-- Contenedor del texto alineado con el resto de la página -->
+            <div class="relative z-20 w-full max-w-5xl mx-auto px-6 pb-16 md:pb-24 flex flex-col md:flex-row md:justify-between md:items-end gap-6">
                 
-                <!-- La Imagen de Fondo -->
-                <img src="assets/render_vial.png" 
-                     alt="EVI-Cap desplegado en ruta concesionaria" 
-                     class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105">
-                
-                <!-- Capa de degradado oscuro inferior para asegurar la lectura del texto -->
-                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
-                
-                <!-- Textos superpuestos en la esquina inferior izquierda (Estilo Apple) -->
-                <div class="relative z-10 p-8 md:p-16 max-w-xl space-y-4 fade-in">
-                    <span class="text-orange-500 font-semibold tracking-widest text-xs uppercase">Despliegue en Terreno</span>
-                    <h3 class="text-3xl md:text-5xl font-bold tracking-tighter text-white leading-none">
+                <!-- Textos superpuestos -->
+                <div class="max-w-xl space-y-4 fade-in">
+                    <span class="text-orange-500 font-semibold tracking-widest text-xs uppercase drop-shadow-md">Despliegue en Terreno</span>
+                    <h3 class="text-4xl md:text-6xl font-bold tracking-tighter text-white leading-none drop-shadow-lg">
                         Diseñado para la intemperie.
                     </h3>
-                    <p class="text-apple-gray font-light text-base md:text-lg leading-relaxed">
+                    <p class="text-gray-300 font-light text-base md:text-xl leading-relaxed drop-shadow-md max-w-md">
                         Carcasa con optimización topológica y sellado hermético industrial. El anillo óptico de alta potencia asegura visibilidad complementaria mientras el hardware interno resguarda el perímetro de la faena.
                     </p>
                 </div>
 
-                <!-- Indicador técnico flotante en la esquina superior derecha -->
-                <div class="absolute top-6 right-6 z-10 bg-black/60 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-[10px] font-mono tracking-widest uppercase text-apple-gray">
-                    Simulación de Entorno: Niebla / Ruta 5 Sur
+                <!-- Indicador técnico flotante (Se adapta a móviles y PC) -->
+                <div class="w-fit mb-4 md:mb-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 px-5 py-2.5 rounded-full text-[9px] md:text-[10px] font-mono tracking-widest uppercase text-apple-gray shadow-2xl">
+                    Simulación: Niebla / Ruta 5 Sur
                 </div>
 
             </div>
         </div>
     </section>
-    <!-- 3. ESPECIFICACIONES (Estilo menú de ajustes de iOS) -->
-    <section id="tecnologia" class="py-32 border-t border-white/10">
+
+    <!-- SECCIÓN: FONDO INTERACTIVO DE RED MESH -->
+    <section class="relative w-full h-[600px] md:h-[800px] overflow-hidden border-y border-white/5 bg-black/20 backdrop-blur-sm">
+        <!-- Contenedor del Canvas de Particles.js -->
+        <div id="particles-mesh" class="absolute inset-0 w-full h-full z-0"></div>
+        
+        <!-- ZONA PROTEGIDA -->
+        <div class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
+            <div class="relative flex flex-col items-center transform transition-all duration-500 hover:scale-110 pointer-events-auto">
+                <div class="absolute top-4 w-32 h-32 bg-orange-500/20 rounded-full blur-2xl animate-pulse mix-blend-screen"></div>
+                <svg class="w-20 h-20 text-[#ff9500] drop-shadow-[0_0_12px_rgba(255,149,0,0.8)] relative z-20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.8" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" class="opacity-20 text-white"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.5c-3.5 0-5.5 2-5.5 3.5v1h11v-1c0-1.5-2-3.5-5.5-3.5z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v5m-4 0v6a1 1 0 001 1h6a1 1 0 001-1v-6m-9-3a2 2 0 012-2h6a2 2 0 012 2v3a2 2 0 01-2 2h-6a2 2 0 01-2-2v-3z"/>
+                </svg>
+                <div class="mt-6 px-4 py-1.5 border border-orange-500/40 bg-black/40 rounded-full backdrop-blur-xl shadow-[0_0_15px_rgba(255,149,0,0.2)]">
+                    <span class="text-[#ff9500] text-[10px] font-mono uppercase tracking-[0.2em] flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 bg-[#ff9500] rounded-full animate-ping"></span>
+                        Cuadrilla Protegida
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. ESPECIFICACIONES -->
+    <section id="tecnologia" class="py-32 relative">
         <div class="max-w-3xl mx-auto px-6 fade-in">
             <h2 class="text-4xl font-bold tracking-tighter text-center mb-16">Arquitectura Pro.</h2>
 
-            <div class="flex justify-center bg-apple-dark p-1 rounded-full mb-10 mx-auto w-fit">
-                <button class="tab-btn active bg-apple-gray/20 text-white px-6 py-2 rounded-full font-medium text-sm transition" data-target="tab-hardware">Hardware</button>
+            <div class="flex justify-center bg-white/[0.03] backdrop-blur-md p-1 border border-white/10 rounded-full mb-10 mx-auto w-fit shadow-xl">
+                <button class="tab-btn active bg-white/10 text-white px-6 py-2 rounded-full font-medium text-sm transition shadow-sm" data-target="tab-hardware">Hardware</button>
                 <button class="tab-btn text-apple-gray hover:text-white px-6 py-2 rounded-full font-medium text-sm transition" data-target="tab-redes">Redes</button>
                 <button class="tab-btn text-apple-gray hover:text-white px-6 py-2 rounded-full font-medium text-sm transition" data-target="tab-energia">Energía</button>
             </div>
 
-            <div class="min-h-[200px]">
+            <div class="min-h-[200px] bg-white/[0.02] backdrop-blur-2xl border border-white/5 rounded-[2rem] p-8 shadow-2xl">
                 <!-- Hardware -->
                 <div id="tab-hardware" class="tab-content block animate-fade-in-fast space-y-6">
-                    <div class="flex justify-between items-center border-b border-white/10 pb-4">
+                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
                         <span class="text-apple-gray">Cerebro</span>
-                        <span class="font-medium text-right">Espressif ESP32-S3 (Dual-Core)</span>
+                        <span class="font-medium text-right text-white">Espressif ESP32-S3 (Dual-Core)</span>
                     </div>
-                    <div class="flex justify-between items-center border-b border-white/10 pb-4">
+                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
                         <span class="text-apple-gray">Sensorética</span>
-                        <span class="font-medium text-right">Módulo Radar HB100 (Banda X)</span>
+                        <span class="font-medium text-right text-white">Módulo Radar HB100 (Banda X)</span>
                     </div>
-                    <div class="flex justify-between items-center border-b border-white/10 pb-4">
+                    <div class="flex justify-between items-center pb-2">
                         <span class="text-apple-gray">Manufactura</span>
-                        <span class="font-medium text-right">Impresión 3D PETG/ABS (IP67)</span>
+                        <span class="font-medium text-right text-white">Impresión 3D PETG/ABS (IP67)</span>
                     </div>
                 </div>
 
-                <!-- Redes (Oculto por defecto) -->
+                <!-- Redes -->
                 <div id="tab-redes" class="tab-content hidden animate-fade-in-fast space-y-6">
-                    <div class="flex justify-between items-center border-b border-white/10 pb-4">
+                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
                         <span class="text-apple-gray">Lazo Crítico</span>
-                        <span class="font-medium text-right">ESP-NOW (Cero latencia, peer-to-peer)</span>
+                        <span class="font-medium text-right text-white">ESP-NOW (Cero latencia, peer-to-peer)</span>
                     </div>
-                    <div class="flex justify-between items-center border-b border-white/10 pb-4">
+                    <div class="flex justify-between items-center pb-2">
                         <span class="text-apple-gray">Backhaul Cloud</span>
-                        <span class="font-medium text-right">LoRaWAN (Largo alcance 5-10 Km)</span>
+                        <span class="font-medium text-right text-white">LoRaWAN (Largo alcance 5-10 Km)</span>
                     </div>
                 </div>
 
-                <!-- Energía (Oculto por defecto) -->
+                <!-- Energía -->
                 <div id="tab-energia" class="tab-content hidden animate-fade-in-fast space-y-6">
-                    <div class="flex justify-between items-center border-b border-white/10 pb-4">
+                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
                         <span class="text-apple-gray">Baterías</span>
-                        <span class="font-medium text-right">Celdas Litio-Ferrofosfato (LiFePO4)</span>
+                        <span class="font-medium text-right text-white">Celdas Litio-Ferrofosfato (LiFePO4)</span>
                     </div>
-                    <div class="flex justify-between items-center border-b border-white/10 pb-4">
+                    <div class="flex justify-between items-center pb-2">
                         <span class="text-apple-gray">Eficiencia</span>
-                        <span class="font-medium text-right">Deep Sleep mode (Microamperios)</span>
+                        <span class="font-medium text-right text-white">Deep Sleep mode (Microamperios)</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 4. SIMULADOR (Dashboard elegante) -->
-    <section id="prototipo" class="py-32 bg-apple-dark">
+   <!-- 4. VALIDACIÓN DE IMPACTO (Métricas Reales CONASET / INNSPIRA) -->
+    <section id="prototipo" class="py-32 relative">
         <div class="max-w-5xl mx-auto px-6 fade-in">
             <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold tracking-tighter mb-4">Gemelo Digital.</h2>
-                <p class="text-apple-gray">Telemetría proyectada en tiempo real hacia la central de ISA Vías.</p>
+                <h2 class="text-xs font-semibold text-orange-500 uppercase tracking-widest mb-3">Desafío INNSPIRA: Viabilidad e Impacto</h2>
+                <h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-4 text-white">El Factor Tiempo es Mortal.</h2>
+                <p class="text-apple-gray max-w-xl mx-auto font-light">
+                    Análisis de la distancia recorrida a ciegas por un vehículo antes de que el conductor logre reaccionar bajo condiciones de visibilidad reducida en el sur de Chile.
+                </p>
             </div>
 
-            <div class="bg-apple-black rounded-[2rem] p-8 border border-white/5 shadow-2xl relative overflow-hidden">
+            <div class="bg-white/[0.02] backdrop-blur-2xl rounded-[2.5rem] p-8 md:p-12 border border-white/10 shadow-2xl relative overflow-hidden">
                 
-                <!-- Status Banner -->
-                <div class="flex justify-between items-center mb-10">
-                    <div>
-                        <span class="text-xs text-apple-gray uppercase tracking-widest font-bold">Flujo Vehicular</span>
-                        <div class="text-3xl font-medium mt-1" id="car-count">1,248</div>
+                <!-- Indicadores Clave de Riesgo (KPIs Reales) -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-12 text-left">
+                    <div class="border-l-2 border-red-500 pl-4">
+                        <span class="text-xs text-apple-gray uppercase tracking-widest font-bold">Mortalidad Vial</span>
+                        <div class="text-3xl font-bold mt-1 text-white">1.5 s</div>
+                        <p class="text-xs text-apple-gray mt-1">Tiempo promedio de percepción y reacción humana en carretera con clima adverso.</p>
                     </div>
                     
-                    <div id="status-panel" class="bg-[#1d1d1f] border border-[#2c2c2e] text-apple-light px-6 py-2 rounded-full font-medium text-sm flex items-center gap-3 transition-all duration-300">
-                        <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                        <span id="status-text">Sistema Estable</span>
+                    <div class="border-l-2 border-orange-500 pl-4">
+                        <span class="text-xs text-apple-gray uppercase tracking-widest font-bold">Distancia Crítica</span>
+                        <div class="text-3xl font-bold mt-1 text-white">42 mt</div>
+                        <p class="text-xs text-apple-gray mt-1">Recorridos a ciegas a 100 km/h antes de que el chofer siquiera toque el freno.</p>
+                    </div>
+
+                    <div class="border-l-2 border-apple-blue pl-4">
+                        <span class="text-xs text-apple-gray uppercase tracking-widest font-bold">Ventaja EVI-Cap</span>
+                        <div class="text-3xl font-bold mt-1 text-apple-blue">&lt; 25 ms</div>
+                        <p class="text-xs text-apple-gray mt-1">Detección por microondas y propagación de red que gana metros de vida para la cuadrilla.</p>
                     </div>
                 </div>
 
-                <!-- Chart -->
-                <div class="h-64 w-full mb-10">
+                <!-- Contenedor del Gráfico Estadístico -->
+                <div class="h-80 w-full mb-8 relative z-10">
                     <canvas id="trafficChart"></canvas>
                 </div>
 
-                <!-- Botón Acción -->
-                <div class="flex justify-center">
-                    <button onclick="triggerSimulatedInvasion()" class="bg-white text-black hover:bg-gray-200 px-8 py-3 rounded-full font-semibold transition active:scale-95">
-                        Simular Invasión de Vehículo
+                <!-- Botón de Comparación Dinámica -->
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-white/5 relative z-10">
+                    <p class="text-xs text-apple-gray max-w-md text-center sm:text-left font-light">
+                        * Fuente: Modelado matemático de frenado de emergencia basado en los reportes anuales de siniestralidad en zonas de obras de CONASET.
+                    </p>
+                    <button onclick="toggleMetricView()" id="btn-metric" class="bg-white text-black hover:bg-gray-200 shadow-[0_0_20px_rgba(255,255,255,0.2)] px-6 py-2.5 rounded-full text-sm font-semibold transition active:scale-95 whitespace-nowrap">
+                        Ver Datos de Velocidad vs Distancia
                     </button>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="py-10 text-center text-apple-gray text-xs border-t border-white/10">
+    <footer class="py-10 text-center text-apple-gray text-xs border-t border-white/5 bg-black/40 backdrop-blur-md relative z-10">
         <p>EVI-Cap Proyecto IIoT. Desarrollado por estudiantes de la UCT.</p>
     </footer>
 
-    <script src="dashboard/app.js" defer></script>
+    <!-- 1. Carga de librerías externas -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <!-- 2. Archivo de lógica local aplanado -->
+    <script src="app.js"></script>
 </body>
 </html>

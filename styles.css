@@ -32,3 +32,21 @@ model-viewer {
 html {
     scroll-behavior: smooth;
 }
+/* ==========================================================================
+   Efecto Neón/Bloom para la Red Mesh (Particles.js)
+   ========================================================================== */
+
+#particles-mesh {
+    background-color: #000000; /* Fondo negro absoluto */
+}
+
+#particles-mesh canvas {
+    display: block;
+    /* Múltiples sombras para emular el brillo del neón cian */
+    filter: 
+        drop-shadow(0 0 2px #00f3ff) 
+        drop-shadow(0 0 8px #00a2ff) 
+        drop-shadow(0 0 22px rgba(0, 162, 255, 0.6));
+    mix-blend-mode: screen;
+    will-change: filter;
+}
