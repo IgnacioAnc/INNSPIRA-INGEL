@@ -4,26 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EVI-Cap | INNSPIRA 2026</title>
-    
-    <!-- Fuente Inter (Imita la tipografía SF Pro de Apple) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <meta name="description" content="EVI-Cap: sistema IIoT modular para conos de tránsito. Detección por radar de microondas a través de la niebla y alerta háptica en milisegundos.">
+    <meta name="theme-color" content="#09090b">
+
+    <!-- Fuente Inter (Imita la tipografía SF Pro de Apple) + JetBrains Mono (HUD) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Model-Viewer -->
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
 
-    <!-- Ruta aplanada para el CSS -->
-    <link rel="stylesheet" href="styles.css">
-
-    <!-- Configuración para emular colores de Apple -->
+    <!-- Configuración para emular colores de Apple + acentos futuristas cian/naranja -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'ui-monospace', 'monospace']
+                    },
                     colors: {
                         apple: {
                             black: '#000000',
@@ -31,358 +31,1294 @@
                             gray: '#86868b',
                             light: '#f5f5f7',
                             blue: '#2997ff'
+                        },
+                        signal: {
+                            cyan: '#00f3ff',
+                            amber: '#ff9500',
+                            red: '#ff453a',
+                            green: '#30d158'
                         }
                     }
                 }
             }
-        }
+        };
+        /* Marca que JS está activo: evita que el contenido quede invisible si el JS falla */
+        document.documentElement.classList.add('js-anim');
     </script>
-</head>
-<body class="bg-[#050505] text-apple-light font-sans antialiased selection:bg-apple-blue selection:text-white relative">
 
-    <!-- AMBIENT GLOW BACKGROUND (Iluminación sutil minimalista) -->
-    <div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
-        <div class="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] bg-apple-blue/10 blur-[150px] rounded-full mix-blend-screen"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-orange-500/5 blur-[150px] rounded-full mix-blend-screen"></div>
+    <!-- Model-Viewer (módulo: se difiere automáticamente) -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+    <!-- Hoja de estilos local -->
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        /* ==========================================================================
+           MOTION SYSTEM — curvas y transiciones estilo Apple
+           ========================================================================== */
+        :root {
+            --ease-apple: cubic-bezier(0.22, 1, 0.36, 1);
+            --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+            --glow-cyan: rgba(6, 182, 212, 0.30);
+            --glow-orange: rgba(249, 115, 22, 0.30);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translate3d(0, 28px, 0); }
+            to   { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+        @keyframes fadeInFast {
+            from { opacity: 0; transform: translate3d(0, 8px, 0); }
+            to   { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+
+        .js-anim .fade-in { opacity: 0; will-change: opacity, transform; }
+        .js-anim .fade-in.in-view { animation: fadeInUp 0.9s var(--ease-apple) both; }
+
+        /* Escalonado (animation-delay: no colisiona con el transition-delay de Tailwind) */
+        .fade-in.delay-100 { animation-delay: 0.10s; }
+        .fade-in.delay-150 { animation-delay: 0.15s; }
+        .fade-in.delay-200 { animation-delay: 0.20s; }
+        .fade-in.delay-300 { animation-delay: 0.30s; }
+
+        .animate-fade-in-fast { animation: fadeInFast 0.35s var(--ease-soft) both; }
+
+        /* ==========================================================================
+           TIPOGRAFÍA — degradados metálicos/neón estilo keynote de hardware
+           ========================================================================== */
+        .headline-gradient {
+            background-image: linear-gradient(90deg, #ffffff 0%, #e2e8f0 45%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 1px 60px rgba(255, 255, 255, 0.08);
+        }
+        .headline-accent {
+            background-image: linear-gradient(120deg, #06b6d4 0%, #67e8f9 45%, #ffffff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .eyebrow {
+            background-image: linear-gradient(90deg, #f97316, #fb923c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* ==========================================================================
+           GLASSMORPHISM ELEVADO + GLOW EN HOVER (tarjetas glow-card)
+           ========================================================================== */
+        .glass {
+            background-color: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+                        0 24px 60px -20px rgba(0, 0, 0, 0.80);
+        }
+
+        /* Tarjeta con resplandor que sigue al cursor (--mx / --my se inyectan por JS) */
+        .glow-card {
+            position: relative;
+            isolation: isolate;
+            transition: transform 0.5s var(--ease-apple),
+                        border-color 0.5s var(--ease-soft),
+                        background-color 0.5s var(--ease-soft),
+                        box-shadow 0.5s var(--ease-soft);
+        }
+        .glow-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 0%), var(--glow-cyan), transparent 65%);
+            opacity: 0;
+            transition: opacity 0.5s var(--ease-soft);
+            pointer-events: none;
+            z-index: -1;
+        }
+        /* Filo superior brillante, como el chaflán pulido de un unibody */
+        .glow-card::after {
+            content: '';
+            position: absolute;
+            inset-inline: 12%;
+            top: -1px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+            opacity: 0;
+            transition: opacity 0.5s var(--ease-soft);
+            pointer-events: none;
+        }
+        .glow-card:hover {
+            transform: translateY(-6px); /* equivalente a hover:-translate-y-1.5 */
+            border-color: rgba(6, 182, 212, 0.40);
+            background-color: rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+                        0 30px 70px -22px rgba(6, 182, 212, 0.18),
+                        0 24px 60px -20px rgba(0, 0, 0, 0.85);
+        }
+        .glow-card:hover::before,
+        .glow-card:hover::after { opacity: 1; }
+
+        .glow-amber::before { background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 0%), var(--glow-orange), transparent 65%); }
+        .glow-amber:hover { border-color: rgba(249, 115, 22, 0.40); }
+
+        /* ==========================================================================
+           CONTROLES — micro-interacciones
+           ========================================================================== */
+        .btn-fluid {
+            transition: background-color 0.35s var(--ease-soft),
+                        color 0.35s var(--ease-soft),
+                        box-shadow 0.35s var(--ease-soft),
+                        border-color 0.35s var(--ease-soft),
+                        transform 0.25s var(--ease-apple);
+        }
+        .btn-fluid:hover  { transform: translateY(-1px); }
+        .btn-fluid:active { transform: scale(0.96); }
+
+        .btn-glow:hover { box-shadow: 0 0 0 1px rgba(255,255,255,0.16), 0 8px 28px -6px var(--glow-cyan); }
+
+        .link-fluid { transition: color 0.3s var(--ease-soft), opacity 0.3s var(--ease-soft); }
+
+        /* Oculta la barra de scroll pero conserva el desplazamiento táctil */
+        .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+        /* ==========================================================================
+           MENÚ MÓVIL — hamburguesa animada
+           ========================================================================== */
+        #menu-toggle.is-open .hamburger-line:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+        #menu-toggle.is-open .hamburger-line:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        #menu-toggle.is-open .hamburger-line:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+        #mobile-menu { max-height: 0px; }
+
+        /* ==========================================================================
+           WIDGET DE TELEMETRÍA EN VIVO
+           ========================================================================== */
+        @keyframes beacon {
+            0%, 100% { opacity: 1;   box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.55); }
+            50%      { opacity: 0.55; box-shadow: 0 0 0 7px rgba(48, 209, 88, 0); }
+        }
+        .beacon { animation: beacon 1.8s var(--ease-soft) infinite; }
+        .beacon-alert { animation: beacon 0.6s var(--ease-soft) infinite; box-shadow: 0 0 0 0 rgba(255, 69, 58, 0.55); }
+
+        @keyframes tickerFade {
+            from { opacity: 0; transform: translateY(4px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .ticker-value { animation: tickerFade 0.35s var(--ease-soft) both; }
+
+        /* ==========================================================================
+           TERMINAL HUD DE TELEMETRÍA — estética industrial / militar
+           ========================================================================== */
+        .led {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 9999px;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+        .led-ok    { background: #30d158; box-shadow: 0 0 6px rgba(48, 209, 88, 0.85); }
+        .led-warn  { background: #f97316; box-shadow: 0 0 6px rgba(249, 115, 22, 0.85); }
+        .led-alert { background: #ff453a; box-shadow: 0 0 6px rgba(255, 69, 58, 0.85); }
+
+        @keyframes cursorBlink {
+            0%, 49%  { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+        .term-cursor { animation: cursorBlink 1s steps(1, start) infinite; }
+        .term-log-line { animation: tickerFade 0.35s var(--ease-soft) both; }
+
+        /* ==========================================================================
+           MODEL-VIEWER — escenario, HUD y modo diagnóstico
+           ========================================================================== */
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            --poster-color: transparent;
+            outline: none;
+        }
+
+        .progress-bar { transition: opacity 0.5s var(--ease-soft); }
+        .progress-bar.hide { visibility: hidden; opacity: 0; }
+
+        /* Retícula técnica que solo aparece en Modo Diagnóstico */
+        .diag-grid {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.6s var(--ease-soft);
+            background-image:
+                linear-gradient(rgba(6, 182, 212, 0.10) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(6, 182, 212, 0.10) 1px, transparent 1px);
+            background-size: 48px 48px;
+            mask-image: radial-gradient(circle at 50% 50%, #000 35%, transparent 78%);
+            -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 35%, transparent 78%);
+        }
+        #viewer-stage.diagnostic .diag-grid { opacity: 1; }
+
+        @keyframes scanSweep {
+            0%   { transform: translateY(-10%); opacity: 0; }
+            15%  { opacity: 1; }
+            85%  { opacity: 1; }
+            100% { transform: translateY(760%); opacity: 0; }
+        }
+        .diag-scan {
+            position: absolute;
+            inset-inline: 0;
+            top: 0;
+            height: 8%;
+            pointer-events: none;
+            opacity: 0;
+            background: linear-gradient(180deg, transparent, rgba(6, 182, 212, 0.18), transparent);
+        }
+        #viewer-stage.diagnostic .diag-scan { opacity: 1; animation: scanSweep 4.5s linear infinite; }
+
+        /* Anotaciones técnicas ancladas al modelo 3D */
+        .hotspot {
+            --hs: rgba(6, 182, 212, 0.9);
+            display: block;
+            width: 14px;
+            height: 14px;
+            border-radius: 9999px;
+            border: 1px solid var(--hs);
+            background: rgba(6, 182, 212, 0.18);
+            box-shadow: 0 0 14px rgba(6, 182, 212, 0.55);
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.6);
+            transition: opacity 0.45s var(--ease-soft), transform 0.45s var(--ease-apple);
+        }
+        #viewer-stage.diagnostic .hotspot { opacity: 1; transform: scale(1); pointer-events: auto; }
+        .hotspot[data-visible="false"] { opacity: 0; pointer-events: none; }
+
+        .hotspot-label {
+            position: absolute;
+            left: 22px;
+            top: -8px;
+            white-space: nowrap;
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 9px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #d9fbff;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(6, 182, 212, 0.30);
+            border-radius: 9999px;
+            padding: 5px 10px;
+        }
+
+        /* Estado activo de los filtros de cámara */
+        .cam-btn.active {
+            background-color: rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.18);
+        }
+        .cam-btn.diag-on {
+            background-color: rgba(6, 182, 212, 0.16);
+            color: #9ff4ff;
+            border-color: rgba(6, 182, 212, 0.45);
+            box-shadow: 0 0 20px -4px rgba(6, 182, 212, 0.7);
+        }
+
+        /* Accesibilidad y preferencias del sistema */
+        :focus-visible {
+            outline: 2px solid #06b6d4;
+            outline-offset: 3px;
+            border-radius: 9999px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            .js-anim .fade-in { opacity: 1; }
+            .glow-card:hover, .btn-fluid:hover { transform: none; }
+        }
+    </style>
+</head>
+<body class="bg-[#09090b] text-apple-light font-sans antialiased selection:bg-cyan-500 selection:text-white">
+
+    <!-- AMBIENT GLOW BACKGROUND (Esferas de luz difuminadas cian / naranja) -->
+    <div class="fixed inset-0 -z-10 pointer-events-none overflow-hidden" aria-hidden="true">
+        <div class="absolute top-[-18%] left-[-12%] w-[58vw] h-[58vw] bg-cyan-500/20 blur-[140px] opacity-20 rounded-full mix-blend-screen"></div>
+        <div class="absolute bottom-[-14%] right-[-12%] w-[52vw] h-[52vw] bg-orange-500/20 blur-[140px] opacity-20 rounded-full mix-blend-screen"></div>
+        <div class="absolute top-[38%] right-[18%] w-[28vw] h-[28vw] bg-cyan-500/10 blur-[140px] opacity-20 rounded-full mix-blend-screen"></div>
     </div>
 
-    <!-- NAVEGACIÓN APPLE STYLE (Cristal esmerilado, sin bordes toscos) -->
-    <nav class="fixed w-full z-50 bg-[#050505]/60 backdrop-blur-xl border-b border-white/5 transition-all">
-        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center text-xs font-medium tracking-wide">
-            <div class="flex items-center gap-2">
-                <!-- Logotipo minimalista -->
-                <span class="text-white font-bold text-lg tracking-tighter">EVI-Cap</span>
-            </div>
-            <div class="hidden md:flex space-x-8 text-apple-gray">
-                <a href="#desafio" class="hover:text-white transition">Problema</a>
-                <a href="#solucion" class="hover:text-white transition">Solución</a>
-                <a href="#tecnologia" class="hover:text-white transition">Especificaciones</a>
-                <a href="#prototipo" class="hover:text-white transition">Prototipo</a>
-            </div>
-            <div>
-                <a href="#prototipo" class="bg-white/90 backdrop-blur-md text-black px-4 py-1.5 rounded-full font-semibold hover:bg-white transition">Ver Estadísticas</a>
-            </div>
-        </div>
-    </nav>
+    <!-- NAVEGACIÓN (Cristal esmerilado + menú móvil desplegable) -->
+    <header class="fixed inset-x-0 top-0 z-50 bg-[#09090b]/70 backdrop-blur-2xl backdrop-saturate-150 border-b border-white/10">
+        <nav class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center text-xs font-medium tracking-wide" aria-label="Navegación principal">
+            <a href="#inicio" class="text-white font-bold text-lg tracking-tighter link-fluid">EVI-Cap</a>
 
-    <!-- HERO SECTION (Centrado, tipografía gigante, énfasis en el hardware) -->
-    <section class="pt-32 pb-10 px-6 max-w-5xl mx-auto flex flex-col items-center text-center min-h-screen">
-        <div class="space-y-4 z-10 fade-in mt-10">
-            <h2 class="text-orange-500 font-semibold tracking-widest text-sm uppercase">INNSPIRA 2026</h2>
-            <h1 class="text-6xl md:text-8xl font-bold tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 pb-2">
-                EVI-Cap.
-            </h1>
-            <h3 class="text-3xl md:text-5xl font-medium tracking-tight text-apple-gray pb-6">
-                Seguridad que se adelanta.
-            </h3>
-            <p class="text-lg text-apple-gray max-w-2xl mx-auto font-light leading-relaxed">
-                El primer sistema IIoT modular para conos de tránsito. Detecta invasiones vehiculares mediante microondas a través de la niebla y alerta en milisegundos.
-            </p>
-            <div class="pt-4">
-                <p class="text-xl font-medium">Desde $X CLP por nodo.<span class="text-apple-gray text-sm block mt-1">Implementación de fricción cero.</span></p>
-            </div>
-        </div>
+            <ul class="hidden md:flex space-x-8 text-apple-gray">
+                <li><a href="#desafio" class="link-fluid hover:text-white">Problema</a></li>
+                <li><a href="#solucion" class="link-fluid hover:text-white">Solución</a></li>
+                <li><a href="#tecnologia" class="link-fluid hover:text-white">Especificaciones</a></li>
+                <li><a href="#prototipo" class="link-fluid hover:text-white">Prototipo</a></li>
+            </ul>
 
-       <!-- VISUALIZADOR 3D OFICIAL (Estilo Apple Hardware Showcase) -->
-        <div class="relative w-full max-w-4xl h-[600px] mt-10 fade-in delay-200 mx-auto">
-            
-            <model-viewer 
-                src="https://ignacioanc.github.io/INNSPIRA-INGEL/Meshy_AI_EVI_CAP_Solar_Cap_0718080318_generate.glb" 
-                alt="Prototipo Industrial EVI-Cap IIoT"
-                auto-rotate 
-                camera-controls 
-                ar 
-                ar-modes="webxr scene-viewer quick-look" 
-                tone-mapping="neutral" 
-                shadow-intensity="1"
-                exposure="1.2"
-                class="w-full h-full outline-none drop-shadow-2xl">
-                
-                <!-- Barra de carga minimalista superior -->
-                <div class="progress-bar hide absolute top-0 left-0 w-full h-1 bg-white/10" slot="progress-bar">
-                    <div class="update-bar bg-apple-blue h-full w-0 transition-all duration-200"></div>
-                </div>
-                
-                <!-- Botón AR diseñado al estilo iOS (Flotante abajo a la derecha) -->
-                <button slot="ar-button" id="ar-button" class="absolute bottom-6 right-6 bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-2xl hover:bg-white/20 transition active:scale-95 flex items-center gap-2 z-10">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    Ver en tu espacio (AR)
+            <div class="flex items-center gap-3">
+                <a href="#prototipo" class="hidden sm:inline-block btn-fluid bg-white/90 text-black px-4 py-1.5 rounded-full font-semibold hover:bg-white">Ver Estadísticas</a>
+
+                <!-- Botón hamburguesa animado (solo móvil) -->
+                <button type="button" id="menu-toggle"
+                        class="btn-fluid md:hidden relative w-9 h-9 flex flex-col items-center justify-center gap-[5px] rounded-full border border-white/10 bg-white/[0.03] hover:border-cyan-500/40"
+                        aria-expanded="false" aria-controls="mobile-menu" aria-label="Abrir menú de navegación">
+                    <span class="hamburger-line w-4 h-[1.5px] bg-white rounded-full transition-all duration-300"></span>
+                    <span class="hamburger-line w-4 h-[1.5px] bg-white rounded-full transition-all duration-300"></span>
+                    <span class="hamburger-line w-4 h-[1.5px] bg-white rounded-full transition-all duration-300"></span>
                 </button>
-                
-                <!-- Indicador de asistencia técnica para móviles -->
-                <div id="ar-prompt" class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
-                    <img src="https://modelviewer.dev/shared-assets/icons/hand.png" class="w-12 h-12 animate-bounce opacity-70">
-                </div>
-
-            </model-viewer>
-
-            <!-- Texto de asistencia al usuario en computadoras -->
-            <div class="absolute bottom-6 left-6 text-[10px] text-apple-gray tracking-widest uppercase bg-black/40 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/10 shadow-lg">
-                ✦ Arrastra para inspeccionar la ingeniería
             </div>
+        </nav>
+
+        <!-- Menú desplegable móvil -->
+        <div id="mobile-menu" class="md:hidden overflow-hidden transition-[max-height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]">
+            <ul class="flex flex-col px-6 py-4 gap-1 text-sm text-apple-gray bg-[#09090b]/95 backdrop-blur-xl border-t border-white/5">
+                <li><a href="#desafio" class="mobile-link block py-2.5 border-b border-white/5 hover:text-white hover:pl-2 transition-all duration-300">Problema</a></li>
+                <li><a href="#solucion" class="mobile-link block py-2.5 border-b border-white/5 hover:text-white hover:pl-2 transition-all duration-300">Solución</a></li>
+                <li><a href="#tecnologia" class="mobile-link block py-2.5 border-b border-white/5 hover:text-white hover:pl-2 transition-all duration-300">Especificaciones</a></li>
+                <li><a href="#prototipo" class="mobile-link block py-2.5 hover:text-white hover:pl-2 transition-all duration-300">Prototipo</a></li>
+                <li><a href="#prototipo" class="mobile-link block mt-2 text-center btn-fluid bg-white/90 text-black px-4 py-2 rounded-full font-semibold hover:bg-white">Ver Estadísticas</a></li>
+            </ul>
         </div>
-    </section>
+    </header>
 
-    <!-- 1. EL DESAFÍO (Glassmorphism Cards) -->
-    <section id="desafio" class="py-32 relative">
-        <div class="max-w-5xl mx-auto px-6">
-            <div class="text-center mb-16 fade-in">
-                <h2 class="text-4xl md:text-6xl font-bold tracking-tighter">Invisible para el clima.<br><span class="text-apple-gray">Fatal para el operario.</span></h2>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
-                <!-- Tarjeta 1 -->
-                <div class="bg-white/[0.02] backdrop-blur-2xl border border-white/5 p-12 rounded-[2.5rem] fade-in delay-100 flex flex-col justify-between min-h-[350px] shadow-2xl transition hover:bg-white/[0.04]">
-                    <div>
-                        <h4 class="text-2xl font-bold mb-4 tracking-tight">El problema de la seguridad pasiva.</h4>
-                        <p class="text-apple-gray font-light text-lg">Los conos y cintas reflectantes dependen de que el conductor los vea. Con niebla densa o lluvia en la Araucanía, el tiempo de reacción humano es de 0 segundos.</p>
-                    </div>
-                </div>
-                <!-- Tarjeta 2 -->
-                <div class="bg-white/[0.02] backdrop-blur-2xl border border-white/5 p-12 rounded-[2.5rem] fade-in delay-200 flex flex-col justify-between min-h-[350px] shadow-2xl transition hover:bg-white/[0.04]">
-                    <div>
-                        <h4 class="text-2xl font-bold mb-4 tracking-tight">Cámaras que se quedan ciegas.</h4>
-                        <p class="text-apple-gray font-light text-lg">La humedad satura los lentes de los sistemas LiDAR u ópticos. EVI-Cap utiliza Radar de Microondas que atraviesa cualquier clima sin degradarse.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-   <!-- 2. LA SOLUCIÓN (Grid Premium con Contenedores de Hardware a Gran Escala) -->
-    <section id="solucion" class="py-32 relative">
-        <div class="max-w-5xl mx-auto px-6 text-center">
-            <h2 class="text-4xl md:text-6xl font-bold tracking-tighter mb-20 fade-in">Tres pasos.<br><span class="text-apple-gray">Milisegundos para reaccionar.</span></h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                
-                <!-- Tarjeta 1: Radar -->
-                <div class="bg-white/[0.02] backdrop-blur-xl border border-white/5 p-10 rounded-[2.5rem] fade-in delay-100 shadow-2xl flex flex-col items-center transition duration-300 hover:bg-white/[0.04]">
-                    <!-- Cápsula contenedora para el PNG -->
-                    <div class="w-44 h-44 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center mb-8 shadow-inner relative group">
-                        <div class="absolute inset-0 bg-apple-blue/10 blur-xl rounded-full opacity-50 group-hover:opacity-80 transition-opacity"></div>
-                        <!-- Ruta aplanada -->
-                        <img src="radar.png" alt="Módulo Radar HB100" class="h-32 w-32 object-contain relative z-10 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
-                    </div>
-                    <h4 class="font-bold text-2xl mb-3 text-white">10.5 GHz</h4>
-                    <p class="text-apple-gray text-base font-light leading-relaxed">El Radar Doppler monitorea variaciones de frecuencia a 30 metros de distancia continua.</p>
-                </div>
-                
-                <!-- Tarjeta 2: ESP32 -->
-                <div class="bg-white/[0.02] backdrop-blur-xl border border-white/5 p-10 rounded-[2.5rem] fade-in delay-200 shadow-2xl flex flex-col items-center transition duration-300 hover:bg-white/[0.04]">
-                    <!-- Cápsula contenedora para el PNG -->
-                    <div class="w-44 h-44 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center mb-8 shadow-inner relative group">
-                        <div class="absolute inset-0 bg-apple-blue/10 blur-xl rounded-full opacity-50 group-hover:opacity-80 transition-opacity"></div>
-                        <!-- Ruta aplanada -->
-                        <img src="esp32.png" alt="Microcontrolador ESP32-S3" class="h-32 w-32 object-contain relative z-10 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
-                    </div>
-                    <h4 class="font-bold text-2xl mb-3 text-white">Edge AI</h4>
-                    <p class="text-apple-gray text-base font-light leading-relaxed">El ESP32-S3 procesa vectores, distinguiendo el tráfico normal de una intrusión en la berma.</p>
-                </div>
-                
-                <!-- Tarjeta 3: Pulsera -->
-                <div class="bg-white/[0.02] backdrop-blur-xl border border-white/5 p-10 rounded-[2.5rem] fade-in delay-300 shadow-2xl flex flex-col items-center transition duration-300 hover:bg-white/[0.04]">
-                    <!-- Cápsula contenedora para el PNG -->
-                    <div class="w-44 h-44 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center mb-8 shadow-inner relative group">
-                        <div class="absolute inset-0 bg-orange-500/10 blur-xl rounded-full opacity-50 group-hover:opacity-80 transition-opacity"></div>
-                        <!-- Ruta aplanada -->
-                        <img src="pulsera.png" alt="Pulsera Háptica de Alerta" class="h-32 w-32 object-contain relative z-10 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
-                    </div>
-                    <h4 class="font-bold text-2xl mb-3 text-white">&lt; 25 ms</h4>
-                    <p class="text-apple-gray text-base font-light leading-relaxed">Transmisión peer-to-peer (ESP-NOW) que hace vibrar la pulsera del trabajador al instante.</p>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
- <!-- SECCIÓN SHOWCASE VISUAL (Cinematic Edge-to-Edge Fade) -->
-    <section class="py-20 relative overflow-hidden">
-        
-        <!-- Contenedor Expansivo sin bordes ni esquinas -->
-        <div class="relative w-full min-h-[60vh] md:min-h-[80vh] flex items-end">
-            
-            <!-- La Imagen de Fondo (Ruta aplanada) -->
-            <img src="render_vial.png" 
-                 alt="EVI-Cap desplegado en ruta concesionaria" 
-                 class="absolute inset-0 w-full h-full object-cover object-center opacity-60">
-            
-            <!-- Degradado Superior (Funde la imagen con la sección de arriba) -->
-            <div class="absolute inset-x-0 top-0 h-32 md:h-48 bg-gradient-to-b from-[#050505] to-transparent z-10"></div>
-            
-            <!-- Degradado Inferior (Funde la imagen hacia abajo y sirve de base oscura para leer el texto) -->
-            <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent z-10"></div>
-            
-            <!-- Degradado Izquierdo (Funde el borde lateral izquierdo) -->
-            <div class="absolute inset-y-0 left-0 w-1/4 md:w-1/3 bg-gradient-to-r from-[#050505] to-transparent z-10"></div>
-            
-            <!-- Degradado Derecho (Funde el borde lateral derecho) -->
-            <div class="absolute inset-y-0 right-0 w-1/4 md:w-1/3 bg-gradient-to-l from-[#050505] to-transparent z-10"></div>
-            
-            <!-- Contenedor del texto alineado con el resto de la página -->
-            <div class="relative z-20 w-full max-w-5xl mx-auto px-6 pb-16 md:pb-24 flex flex-col md:flex-row md:justify-between md:items-end gap-6">
-                
-                <!-- Textos superpuestos -->
-                <div class="max-w-xl space-y-4 fade-in">
-                    <span class="text-orange-500 font-semibold tracking-widest text-xs uppercase drop-shadow-md">Despliegue en Terreno</span>
-                    <h3 class="text-4xl md:text-6xl font-bold tracking-tighter text-white leading-none drop-shadow-lg">
-                        Diseñado para la intemperie.
-                    </h3>
-                    <p class="text-gray-300 font-light text-base md:text-xl leading-relaxed drop-shadow-md max-w-md">
-                        Carcasa con optimización topológica y sellado hermético industrial. El anillo óptico de alta potencia asegura visibilidad complementaria mientras el hardware interno resguarda el perímetro de la faena.
-                    </p>
-                </div>
-
-                <!-- Indicador técnico flotante (Se adapta a móviles y PC) -->
-                <div class="w-fit mb-4 md:mb-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 px-5 py-2.5 rounded-full text-[9px] md:text-[10px] font-mono tracking-widest uppercase text-apple-gray shadow-2xl">
-                    Simulación: Niebla / Ruta 5 Sur
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- SECCIÓN: FONDO INTERACTIVO DE RED MESH -->
-    <section class="relative w-full h-[600px] md:h-[800px] overflow-hidden border-y border-white/5 bg-black/20 backdrop-blur-sm">
-        <!-- Contenedor del Canvas de Particles.js -->
-        <div id="particles-mesh" class="absolute inset-0 w-full h-full z-0"></div>
-        
-        <!-- ZONA PROTEGIDA -->
-        <div class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
-            <div class="relative flex flex-col items-center transform transition-all duration-500 hover:scale-110 pointer-events-auto">
-                <div class="absolute top-4 w-32 h-32 bg-orange-500/20 rounded-full blur-2xl animate-pulse mix-blend-screen"></div>
-                <svg class="w-20 h-20 text-[#ff9500] drop-shadow-[0_0_12px_rgba(255,149,0,0.8)] relative z-20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.8" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" class="opacity-20 text-white"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.5c-3.5 0-5.5 2-5.5 3.5v1h11v-1c0-1.5-2-3.5-5.5-3.5z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v5m-4 0v6a1 1 0 001 1h6a1 1 0 001-1v-6m-9-3a2 2 0 012-2h6a2 2 0 012 2v3a2 2 0 01-2 2h-6a2 2 0 01-2-2v-3z"/>
-                </svg>
-                <div class="mt-6 px-4 py-1.5 border border-orange-500/40 bg-black/40 rounded-full backdrop-blur-xl shadow-[0_0_15px_rgba(255,149,0,0.2)]">
-                    <span class="text-[#ff9500] text-[10px] font-mono uppercase tracking-[0.2em] flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 bg-[#ff9500] rounded-full animate-ping"></span>
-                        Cuadrilla Protegida
-                    </span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 3. ESPECIFICACIONES -->
-    <section id="tecnologia" class="py-32 relative">
-        <div class="max-w-3xl mx-auto px-6 fade-in">
-            <h2 class="text-4xl font-bold tracking-tighter text-center mb-16">Arquitectura.</h2>
-
-            <div class="flex justify-center bg-white/[0.03] backdrop-blur-md p-1 border border-white/10 rounded-full mb-10 mx-auto w-fit shadow-xl">
-                <button class="tab-btn active bg-white/10 text-white px-6 py-2 rounded-full font-medium text-sm transition shadow-sm" data-target="tab-hardware">Hardware</button>
-                <button class="tab-btn text-apple-gray hover:text-white px-6 py-2 rounded-full font-medium text-sm transition" data-target="tab-redes">Redes</button>
-                <button class="tab-btn text-apple-gray hover:text-white px-6 py-2 rounded-full font-medium text-sm transition" data-target="tab-energia">Energía</button>
-            </div>
-
-            <div class="min-h-[200px] bg-white/[0.02] backdrop-blur-2xl border border-white/5 rounded-[2rem] p-8 shadow-2xl">
-                <!-- Hardware -->
-                <div id="tab-hardware" class="tab-content block animate-fade-in-fast space-y-6">
-                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
-                        <span class="text-apple-gray">Cerebro</span>
-                        <span class="font-medium text-right text-white">Espressif ESP32-S3 (Dual-Core)</span>
-                    </div>
-                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
-                        <span class="text-apple-gray">Sensorética</span>
-                        <span class="font-medium text-right text-white">Módulo Radar HB100 (Banda X)</span>
-                    </div>
-                    <div class="flex justify-between items-center pb-2">
-                        <span class="text-apple-gray">Manufactura</span>
-                        <span class="font-medium text-right text-white">Impresión 3D PETG/ABS (IP67)</span>
-                    </div>
-                </div>
-
-                <!-- Redes -->
-                <div id="tab-redes" class="tab-content hidden animate-fade-in-fast space-y-6">
-                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
-                        <span class="text-apple-gray">Lazo Crítico</span>
-                        <span class="font-medium text-right text-white">ESP-NOW (Cero latencia, peer-to-peer)</span>
-                    </div>
-                    <div class="flex justify-between items-center pb-2">
-                        <span class="text-apple-gray">Backhaul Cloud</span>
-                        <span class="font-medium text-right text-white">LoRaWAN (Largo alcance 5-10 Km)</span>
-                    </div>
-                </div>
-
-                <!-- Energía -->
-                <div id="tab-energia" class="tab-content hidden animate-fade-in-fast space-y-6">
-                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
-                        <span class="text-apple-gray">Baterías</span>
-                        <span class="font-medium text-right text-white">Celdas Litio-Ferrofosfato (LiFePO4)</span>
-                    </div>
-                    <div class="flex justify-between items-center pb-2">
-                        <span class="text-apple-gray">Eficiencia</span>
-                        <span class="font-medium text-right text-white">Deep Sleep mode (Microamperios)</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-   <!-- 4. VALIDACIÓN DE IMPACTO (Métricas Reales CONASET / INNSPIRA) -->
-    <section id="prototipo" class="py-32 relative">
-        <div class="max-w-5xl mx-auto px-6 fade-in">
-            <div class="text-center mb-16">
-                <h2 class="text-xs font-semibold text-orange-500 uppercase tracking-widest mb-3">Desafío INNSPIRA: Viabilidad e Impacto</h2>
-                <h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-4 text-white">El Factor Tiempo es Mortal.</h2>
-                <p class="text-apple-gray max-w-xl mx-auto font-light">
-                    Análisis de la distancia recorrida a ciegas por un vehículo antes de que el conductor logre reaccionar bajo condiciones de visibilidad reducida en el sur de Chile.
+    <main>
+        <!-- HERO SECTION (Centrado, tipografía gigante, énfasis en el hardware) -->
+        <section id="inicio" class="pt-32 pb-10 px-6 max-w-5xl mx-auto flex flex-col items-center text-center min-h-screen">
+            <div class="space-y-4 mt-10 fade-in">
+                <p class="eyebrow font-semibold tracking-widest text-sm uppercase">INNSPIRA 2026</p>
+                <h1 class="headline-gradient text-6xl md:text-8xl font-bold tracking-tighter leading-none pb-2">
+                    EVI-Cap.
+                </h1>
+                <p class="text-3xl md:text-5xl font-medium tracking-tight text-apple-gray pb-6">
+                    Seguridad que se adelanta.
+                </p>
+                <p class="text-lg text-apple-gray max-w-2xl mx-auto font-light leading-relaxed">
+                    El primer sistema IIoT modular para conos de tránsito. Detecta invasiones vehiculares mediante microondas a través de la niebla y alerta en milisegundos.
+                </p>
+                <p class="text-xl font-medium pt-4">
+                    Desde $X CLP por nodo.
+                    <span class="text-apple-gray text-sm block mt-1">Implementación de fricción cero.</span>
                 </p>
             </div>
 
-            <div class="bg-white/[0.02] backdrop-blur-2xl rounded-[2.5rem] p-8 md:p-12 border border-white/10 shadow-2xl relative overflow-hidden">
-                
-                <!-- Indicadores Clave de Riesgo (KPIs Reales) -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-12 text-left">
-                    <div class="border-l-2 border-red-500 pl-4">
-                        <span class="text-xs text-apple-gray uppercase tracking-widest font-bold">Mortalidad Vial</span>
-                        <div class="text-3xl font-bold mt-1 text-white">1.5 s</div>
-                        <p class="text-xs text-apple-gray mt-1">Tiempo promedio de percepción y reacción humana en carretera con clima adverso.</p>
-                    </div>
-                    
-                    <div class="border-l-2 border-orange-500 pl-4">
-                        <span class="text-xs text-apple-gray uppercase tracking-widest font-bold">Distancia Crítica</span>
-                        <div class="text-3xl font-bold mt-1 text-white">42 mt</div>
-                        <p class="text-xs text-apple-gray mt-1">Recorridos a ciegas a 100 km/h antes de que el chofer siquiera toque el freno.</p>
+            <!-- ==========================================================
+                 WIDGET DE ESTADO EN VIVO (Telemetría simulada del nodo)
+                 ========================================================== -->
+            <div id="live-status" class="glass glow-card fade-in delay-100 mt-10 w-full max-w-2xl rounded-[1.75rem] px-5 py-4 md:px-7 md:py-5" role="status" aria-live="polite">
+
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <!-- Badge principal con luz parpadeante -->
+                    <div class="flex items-center gap-3">
+                        <span class="relative flex h-2.5 w-2.5 shrink-0" aria-hidden="true">
+                            <span id="status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-signal-green opacity-60"></span>
+                            <span id="status-beacon" class="beacon relative inline-flex rounded-full h-2.5 w-2.5 bg-signal-green"></span>
+                        </span>
+                        <p id="status-label" class="font-mono text-[10px] md:text-[11px] tracking-[0.16em] uppercase text-white/90">
+                            Estado: Operativo <span class="text-white/25 mx-1">|</span> Red Mesh: Conectada (10.5 GHz)
+                        </p>
                     </div>
 
-                    <div class="border-l-2 border-apple-blue pl-4">
-                        <span class="text-xs text-apple-gray uppercase tracking-widest font-bold">Ventaja EVI-Cap</span>
-                        <div class="text-3xl font-bold mt-1 text-apple-blue">&lt; 25 ms</div>
-                        <p class="text-xs text-apple-gray mt-1">Detección por microondas y propagación de red que gana metros de vida para la cuadrilla.</p>
-                    </div>
-                </div>
-
-                <!-- Contenedor del Gráfico Estadístico -->
-                <div class="h-80 w-full mb-8 relative z-10">
-                    <canvas id="trafficChart"></canvas>
-                </div>
-
-                <!-- Botón de Comparación Dinámica -->
-                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-white/5 relative z-10">
-                    <p class="text-xs text-apple-gray max-w-md text-center sm:text-left font-light">
-                        * Fuente: Modelado matemático de frenado de emergencia basado en los reportes anuales de siniestralidad en zonas de obras de CONASET.
-                    </p>
-                    <button onclick="toggleMetricView()" id="btn-metric" class="bg-white text-black hover:bg-gray-200 shadow-[0_0_20px_rgba(255,255,255,0.2)] px-6 py-2.5 rounded-full text-sm font-semibold transition active:scale-95 whitespace-nowrap">
-                        Ver Datos de Velocidad vs Distancia
+                    <button type="button" id="btn-simulate"
+                        class="btn-fluid btn-glow shrink-0 self-start md:self-auto bg-white/[0.06] border border-white/10 hover:border-cyan-500/40 hover:bg-white/[0.12] text-white text-[11px] font-semibold px-4 py-2 rounded-full">
+                        Simular invasión vehicular
                     </button>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <footer class="py-10 text-center text-apple-gray text-xs border-t border-white/5 bg-black/40 backdrop-blur-md relative z-10">
+                <!-- Lectura de sensores en vivo -->
+                <dl class="grid grid-cols-2 md:grid-cols-4 gap-px mt-5 pt-4 border-t border-white/[0.08] text-left">
+                    <div class="px-1">
+                        <dt class="text-[9px] uppercase tracking-[0.18em] text-apple-gray">Doppler IF</dt>
+                        <dd><span id="tel-doppler" class="ticker-value font-mono text-base md:text-lg font-semibold text-white">0.4 kHz</span></dd>
+                    </div>
+                    <div class="px-1">
+                        <dt class="text-[9px] uppercase tracking-[0.18em] text-apple-gray">Nodos en malla</dt>
+                        <dd><span id="tel-nodes" class="ticker-value font-mono text-base md:text-lg font-semibold text-white">8 / 8</span></dd>
+                    </div>
+                    <div class="px-1">
+                        <dt class="text-[9px] uppercase tracking-[0.18em] text-apple-gray">Latencia ESP-NOW</dt>
+                        <dd><span id="tel-latency" class="ticker-value font-mono text-base md:text-lg font-semibold text-cyan-400">18 ms</span></dd>
+                    </div>
+                    <div class="px-1">
+                        <dt class="text-[9px] uppercase tracking-[0.18em] text-apple-gray">Batería LiFePO4</dt>
+                        <dd><span id="tel-battery" class="ticker-value font-mono text-base md:text-lg font-semibold text-white">96 %</span></dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- ==========================================================
+                 TERMINAL HUD DE TELEMETRÍA (Consola industrial/militar)
+                 ========================================================== -->
+            <div id="terminal-hud" class="fade-in delay-150 mt-6 w-full max-w-2xl rounded-2xl overflow-hidden border border-cyan-500/20 bg-black/60 backdrop-blur-xl text-left shadow-[0_20px_60px_-20px_rgba(0,0,0,0.85)]">
+                <div class="flex items-center justify-between gap-3 px-4 py-2.5 bg-white/[0.03] border-b border-white/10">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#ff453a]/80" aria-hidden="true"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-orange-500/80" aria-hidden="true"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-signal-green/80" aria-hidden="true"></span>
+                        <span class="ml-2 font-mono text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-white/50">EVICAP_TELEMETRY_CONSOLE // NODE-07</span>
+                    </div>
+                    <span class="font-mono text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-cyan-400/80 flex items-center gap-1.5">
+                        <span class="relative flex h-1.5 w-1.5" aria-hidden="true">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-70"></span>
+                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-400"></span>
+                        </span>
+                        LIVE
+                    </span>
+                </div>
+                <div id="hud-log" class="h-44 md:h-52 overflow-y-auto px-4 py-3 font-mono text-[10.5px] md:text-[11px] leading-relaxed space-y-1.5 scrollbar-hide" role="log" aria-live="polite" aria-label="Registro de eventos del sistema"></div>
+                <div class="flex items-center gap-2 px-4 py-2 border-t border-white/10 bg-white/[0.02] font-mono text-[11px] text-white/40">
+                    <span class="text-cyan-400">root@evicap-node07:~$</span>
+                    <span class="term-cursor text-white/70">_</span>
+                </div>
+            </div>
+
+            <!-- VISUALIZADOR 3D OFICIAL (Estilo Apple Hardware Showcase, adaptativo en móviles) -->
+            <div id="viewer-stage" class="relative w-full max-w-4xl min-h-[420px] h-[70vh] md:h-[600px] mt-8 mx-auto fade-in delay-200">
+
+                <model-viewer
+                    id="hero-model"
+                    src="https://ignacioanc.github.io/INNSPIRA-INGEL/Meshy_AI_EVI_CAP_Solar_Cap_0718080318_generate.glb" 
+                    alt="Prototipo Industrial EVI-Cap IIoT"
+                    loading="lazy"
+                    reveal="auto"
+                    auto-rotate
+                    rotation-per-second="18deg"
+                    camera-controls
+                    interaction-prompt="none"
+                    ar
+                    ar-modes="webxr scene-viewer quick-look"
+                    tone-mapping="neutral"
+                    shadow-intensity="1"
+                    exposure="1.2"
+                    min-field-of-view="18deg"
+                    class="w-full h-full outline-none drop-shadow-2xl">
+
+                    <!-- Barra de carga minimalista superior -->
+                    <div class="progress-bar hide absolute top-0 left-0 w-full h-1 bg-white/10 rounded-full overflow-hidden" slot="progress-bar">
+                        <div class="update-bar bg-cyan-400 h-full w-0 transition-all duration-200"></div>
+                    </div>
+
+                    <!-- Anotaciones técnicas (solo visibles en Modo Diagnóstico) -->
+                    <button class="hotspot" slot="hotspot-radar" data-position="0.05 0.06 0.07" data-normal="0 1 0" data-visibility-attribute="visible" tabindex="-1" aria-label="Radar HB100">
+                        <span class="hotspot-label">Radar HB100 · 10.5 GHz</span>
+                    </button>
+                    <button class="hotspot" slot="hotspot-mcu" data-position="-0.06 0.02 -0.04" data-normal="0 1 0" data-visibility-attribute="visible" tabindex="-1" aria-label="ESP32-S3">
+                        <span class="hotspot-label">ESP32-S3 · Edge AI</span>
+                    </button>
+                    <button class="hotspot" slot="hotspot-solar" data-position="0 0.12 0" data-normal="0 1 0" data-visibility-attribute="visible" tabindex="-1" aria-label="Captación solar">
+                        <span class="hotspot-label">Captación solar · LiFePO4</span>
+                    </button>
+
+                    <!-- Botón AR diseñado al estilo iOS (Flotante abajo a la derecha) -->
+                    <button slot="ar-button" id="ar-button" type="button"
+                        class="btn-fluid absolute bottom-6 right-6 z-20 flex items-center gap-2 bg-white/10 backdrop-blur-xl border border-white/20 hover:border-cyan-500/40 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-2xl hover:bg-white/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Ver en tu espacio (AR)
+                    </button>
+
+                    <!-- Indicador de asistencia técnica para móviles -->
+                    <div slot="ar-prompt" id="ar-prompt" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <img src="https://modelviewer.dev/shared-assets/icons/hand.png" alt="" loading="lazy" decoding="async" class="w-12 h-12 animate-bounce opacity-70">
+                    </div>
+
+                </model-viewer>
+
+                <!-- Retícula y barrido del Modo Diagnóstico -->
+                <div class="diag-grid rounded-[2rem]" aria-hidden="true"></div>
+                <div class="diag-scan" aria-hidden="true"></div>
+
+                <!-- ==========================================================
+                     CONTROLES DE CÁMARA / MODO DIAGNÓSTICO
+                     (deslizables horizontalmente en móviles: overflow-x-auto)
+                     ========================================================== -->
+                <div class="absolute top-4 inset-x-0 z-20 flex justify-center px-4 pointer-events-none">
+                    <div class="glass pointer-events-auto flex flex-nowrap md:flex-wrap items-center justify-start md:justify-center gap-1 p-1 rounded-full max-w-[92vw] overflow-x-auto scrollbar-hide" role="group" aria-label="Controles del visor 3D">
+                        <button type="button" class="cam-btn btn-fluid active shrink-0 whitespace-nowrap px-3.5 md:px-4 py-1.5 rounded-full text-[10px] md:text-[11px] font-semibold tracking-wide text-apple-gray hover:text-white border border-transparent"
+                                data-orbit="0deg 78deg 105%" data-target="auto auto auto" data-fov="32deg">Vista Frontal</button>
+
+                        <button type="button" class="cam-btn btn-fluid shrink-0 whitespace-nowrap px-3.5 md:px-4 py-1.5 rounded-full text-[10px] md:text-[11px] font-semibold tracking-wide text-apple-gray hover:text-white border border-transparent"
+                                data-orbit="0deg 8deg 95%" data-target="auto auto auto" data-fov="30deg">Vista Superior</button>
+
+                        <button type="button" class="cam-btn btn-fluid shrink-0 whitespace-nowrap px-3.5 md:px-4 py-1.5 rounded-full text-[10px] md:text-[11px] font-semibold tracking-wide text-apple-gray hover:text-white border border-transparent"
+                                data-orbit="-38deg 68deg 78%" data-target="auto auto auto" data-fov="26deg">Detalle Sensor</button>
+
+                        <button type="button" id="btn-reset-cam" class="btn-fluid shrink-0 whitespace-nowrap px-3.5 md:px-4 py-1.5 rounded-full text-[10px] md:text-[11px] font-semibold tracking-wide text-apple-gray hover:text-white border border-transparent">Resetear Cam</button>
+
+                        <span class="hidden md:block w-px h-4 bg-white/10 mx-1" aria-hidden="true"></span>
+
+                        <button type="button" id="btn-diagnostic" aria-pressed="false"
+                                class="cam-btn btn-fluid shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3.5 md:px-4 py-1.5 rounded-full text-[10px] md:text-[11px] font-semibold tracking-wide text-apple-gray hover:text-white border border-white/10">
+                            <span class="w-1.5 h-1.5 rounded-full bg-current" aria-hidden="true"></span>
+                            Modo Diagnóstico
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Texto de asistencia al usuario en computadoras -->
+                <p id="viewer-hint" class="glass absolute bottom-6 left-6 z-20 text-[10px] text-apple-gray tracking-widest uppercase px-4 py-1.5 rounded-full hidden sm:block">
+                    ✦ Arrastra para inspeccionar la ingeniería
+                </p>
+            </div>
+        </section>
+
+        <!-- 1. EL DESAFÍO (Glassmorphism Cards) -->
+        <section id="desafio" class="py-32">
+            <div class="max-w-5xl mx-auto px-6">
+                <header class="text-center mb-16 fade-in">
+                    <h2 class="text-4xl md:text-6xl font-bold tracking-tighter">
+                        <span class="headline-gradient">Invisible para el clima.</span><br><span class="text-apple-gray">Fatal para el operario.</span>
+                    </h2>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <article class="glass glow-card fade-in delay-100 p-12 rounded-[2.5rem] min-h-[350px]">
+                        <h3 class="text-2xl font-bold mb-4 tracking-tight">El problema de la seguridad pasiva.</h3>
+                        <p class="text-apple-gray font-light text-lg">Los conos y cintas reflectantes dependen de que el conductor los vea. Con niebla densa o lluvia en la Araucanía, el tiempo de reacción humano es de 0 segundos.</p>
+                    </article>
+
+                    <article class="glass glow-card fade-in delay-200 p-12 rounded-[2.5rem] min-h-[350px]">
+                        <h3 class="text-2xl font-bold mb-4 tracking-tight">Cámaras que se quedan ciegas.</h3>
+                        <p class="text-apple-gray font-light text-lg">La humedad satura los lentes de los sistemas LiDAR u ópticos. EVI-Cap utiliza Radar de Microondas que atraviesa cualquier clima sin degradarse.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. LA SOLUCIÓN (Grid Premium con Contenedores de Hardware a Gran Escala) -->
+        <section id="solucion" class="py-32">
+            <div class="max-w-5xl mx-auto px-6 text-center">
+                <h2 class="text-4xl md:text-6xl font-bold tracking-tighter mb-20 fade-in">
+                    <span class="headline-gradient">Tres pasos.</span><br><span class="text-apple-gray">Milisegundos para reaccionar.</span>
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                    <!-- Radar -->
+                    <article class="glass glow-card fade-in delay-100 group p-10 rounded-[2.5rem] flex flex-col items-center">
+                        <div class="relative w-44 h-44 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mb-8 shadow-inner">
+                            <div class="absolute inset-0 bg-cyan-500/10 blur-xl rounded-full opacity-50 group-hover:opacity-90 transition-opacity duration-500" aria-hidden="true"></div>
+                            <img src="radar.png" alt="Módulo Radar HB100" loading="lazy" decoding="async" class="relative z-10 h-32 w-32 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-700 ease-out group-hover:scale-105">
+                        </div>
+                        <h3 class="headline-accent font-bold text-2xl mb-3">10.5 GHz</h3>
+                        <p class="text-apple-gray text-base font-light leading-relaxed">El Radar Doppler monitorea variaciones de frecuencia a 30 metros de distancia continua.</p>
+                    </article>
+
+                    <!-- ESP32 -->
+                    <article class="glass glow-card fade-in delay-200 group p-10 rounded-[2.5rem] flex flex-col items-center">
+                        <div class="relative w-44 h-44 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mb-8 shadow-inner">
+                            <div class="absolute inset-0 bg-cyan-500/10 blur-xl rounded-full opacity-50 group-hover:opacity-90 transition-opacity duration-500" aria-hidden="true"></div>
+                            <img src="esp32.png" alt="Microcontrolador ESP32-S3" loading="lazy" decoding="async" class="relative z-10 h-32 w-32 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-700 ease-out group-hover:scale-105">
+                        </div>
+                        <h3 class="headline-accent font-bold text-2xl mb-3">Edge AI</h3>
+                        <p class="text-apple-gray text-base font-light leading-relaxed">El ESP32-S3 procesa vectores, distinguiendo el tráfico normal de una intrusión en la berma.</p>
+                    </article>
+
+                    <!-- Pulsera -->
+                    <article class="glass glow-card glow-amber fade-in delay-300 group p-10 rounded-[2.5rem] flex flex-col items-center">
+                        <div class="relative w-44 h-44 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mb-8 shadow-inner">
+                            <div class="absolute inset-0 bg-orange-500/10 blur-xl rounded-full opacity-50 group-hover:opacity-90 transition-opacity duration-500" aria-hidden="true"></div>
+                            <img src="pulsera.png" alt="Pulsera Háptica de Alerta" loading="lazy" decoding="async" class="relative z-10 h-32 w-32 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-700 ease-out group-hover:scale-105">
+                        </div>
+                        <h3 class="font-bold text-2xl mb-3 text-white">&lt; 25 ms</h3>
+                        <p class="text-apple-gray text-base font-light leading-relaxed">Transmisión peer-to-peer (ESP-NOW) que hace vibrar la pulsera del trabajador al instante.</p>
+                    </article>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SHOWCASE VISUAL (Cinematic Edge-to-Edge Fade) -->
+        <section class="py-20 overflow-hidden" aria-label="Despliegue en terreno">
+            <div class="relative w-full min-h-[60vh] md:min-h-[80vh] flex items-end">
+
+                <img src="render_vial.png"
+                     alt="EVI-Cap desplegado en ruta concesionaria"
+                     loading="lazy" decoding="async"
+                     class="absolute inset-0 w-full h-full object-cover object-center opacity-60">
+
+                <!-- Degradados de fusión con el fondo (superior, inferior y laterales) -->
+                <div class="absolute inset-x-0 top-0 h-32 md:h-48 bg-gradient-to-b from-[#09090b] to-transparent z-10" aria-hidden="true"></div>
+                <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#09090b] via-[#09090b]/80 to-transparent z-10" aria-hidden="true"></div>
+                <div class="absolute inset-y-0 left-0 w-1/4 md:w-1/3 bg-gradient-to-r from-[#09090b] to-transparent z-10" aria-hidden="true"></div>
+                <div class="absolute inset-y-0 right-0 w-1/4 md:w-1/3 bg-gradient-to-l from-[#09090b] to-transparent z-10" aria-hidden="true"></div>
+
+                <div class="relative z-20 w-full max-w-5xl mx-auto px-6 pb-16 md:pb-24 flex flex-col md:flex-row md:justify-between md:items-end gap-6">
+
+                    <div class="max-w-xl space-y-4 fade-in">
+                        <p class="eyebrow font-semibold tracking-widest text-xs uppercase">Despliegue en Terreno</p>
+                        <h2 class="text-4xl md:text-6xl font-bold tracking-tighter text-white leading-none drop-shadow-lg">
+                            Diseñado para la intemperie.
+                        </h2>
+                        <p class="text-gray-300 font-light text-base md:text-xl leading-relaxed drop-shadow-md max-w-md">
+                            Carcasa con optimización topológica y sellado hermético industrial. El anillo óptico de alta potencia asegura visibilidad complementaria mientras el hardware interno resguarda el perímetro de la faena.
+                        </p>
+                    </div>
+
+                    <p class="glass w-fit mb-4 md:mb-6 px-5 py-2.5 rounded-full text-[9px] md:text-[10px] font-mono tracking-widest uppercase text-apple-gray">
+                        Simulación: Niebla / Ruta 5 Sur
+                    </p>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- FONDO INTERACTIVO DE RED MESH -->
+        <section class="relative w-full h-[600px] md:h-[800px] overflow-hidden border-y border-white/10 bg-black/20 backdrop-blur-sm" aria-label="Red mesh de nodos EVI-Cap">
+            <div id="particles-mesh" class="absolute inset-0 w-full h-full z-0"></div>
+
+            <!-- ZONA PROTEGIDA -->
+            <div class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
+                <div class="relative flex flex-col items-center pointer-events-auto transition-transform duration-500 hover:scale-110">
+                    <div class="absolute top-4 w-32 h-32 bg-orange-500/20 rounded-full blur-2xl animate-pulse mix-blend-screen" aria-hidden="true"></div>
+                    <svg class="w-20 h-20 text-orange-500 drop-shadow-[0_0_12px_rgba(249,115,22,0.8)] relative z-20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.8" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" class="opacity-20 text-white"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.5c-3.5 0-5.5 2-5.5 3.5v1h11v-1c0-1.5-2-3.5-5.5-3.5z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v5m-4 0v6a1 1 0 001 1h6a1 1 0 001-1v-6m-9-3a2 2 0 012-2h6a2 2 0 012 2v3a2 2 0 01-2 2h-6a2 2 0 01-2-2v-3z"/>
+                    </svg>
+                    <div class="mt-6 px-4 py-1.5 border border-orange-500/40 bg-black/40 rounded-full backdrop-blur-xl shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+                        <span class="text-orange-400 text-[10px] font-mono uppercase tracking-[0.2em] flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping" aria-hidden="true"></span>
+                            Cuadrilla Protegida
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. ESPECIFICACIONES -->
+        <section id="tecnologia" class="py-32">
+            <div class="max-w-3xl mx-auto px-6 fade-in">
+                <h2 class="headline-gradient text-4xl font-bold tracking-tighter text-center mb-16">Arquitectura Pro.</h2>
+
+                <div class="glass flex justify-center p-1 rounded-full mb-10 mx-auto w-fit" role="tablist" aria-label="Especificaciones técnicas">
+                    <button type="button" class="tab-btn btn-fluid active bg-white/10 text-white px-6 py-2 rounded-full font-medium text-sm shadow-sm" data-target="tab-hardware" role="tab" aria-selected="true" aria-controls="tab-hardware">Hardware</button>
+                    <button type="button" class="tab-btn btn-fluid text-apple-gray hover:text-white px-6 py-2 rounded-full font-medium text-sm" data-target="tab-redes" role="tab" aria-selected="false" aria-controls="tab-redes">Redes</button>
+                    <button type="button" class="tab-btn btn-fluid text-apple-gray hover:text-white px-6 py-2 rounded-full font-medium text-sm" data-target="tab-energia" role="tab" aria-selected="false" aria-controls="tab-energia">Energía</button>
+                </div>
+
+                <div class="glass glow-card min-h-[200px] rounded-[2rem] p-8">
+
+                    <!-- Hardware -->
+                    <div id="tab-hardware" class="tab-content animate-fade-in-fast space-y-6" role="tabpanel" tabindex="0">
+                        <div class="flex justify-between items-center border-b border-white/5 pb-4">
+                            <span class="text-apple-gray">Cerebro</span>
+                            <span class="font-medium text-right text-white">Espressif ESP32-S3 (Dual-Core)</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-white/5 pb-4">
+                            <span class="text-apple-gray">Sensorética</span>
+                            <span class="font-medium text-right text-white">Módulo Radar HB100 (Banda X)</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-2">
+                            <span class="text-apple-gray">Manufactura</span>
+                            <span class="font-medium text-right text-white">Impresión 3D PETG/ABS (IP67)</span>
+                        </div>
+                    </div>
+
+                    <!-- Redes -->
+                    <div id="tab-redes" class="tab-content hidden space-y-6" role="tabpanel" tabindex="0">
+                        <div class="flex justify-between items-center border-b border-white/5 pb-4">
+                            <span class="text-apple-gray">Lazo Crítico</span>
+                            <span class="font-medium text-right text-white">ESP-NOW (Cero latencia, peer-to-peer)</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-2">
+                            <span class="text-apple-gray">Backhaul Cloud</span>
+                            <span class="font-medium text-right text-white">LoRaWAN (Largo alcance 5-10 Km)</span>
+                        </div>
+                    </div>
+
+                    <!-- Energía -->
+                    <div id="tab-energia" class="tab-content hidden space-y-6" role="tabpanel" tabindex="0">
+                        <div class="flex justify-between items-center border-b border-white/5 pb-4">
+                            <span class="text-apple-gray">Baterías</span>
+                            <span class="font-medium text-right text-white">Celdas Litio-Ferrofosfato (LiFePO4)</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-2">
+                            <span class="text-apple-gray">Eficiencia</span>
+                            <span class="font-medium text-right text-white">Deep Sleep mode (Microamperios)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. VALIDACIÓN DE IMPACTO (Métricas Reales CONASET / INNSPIRA) -->
+        <section id="prototipo" class="py-32">
+            <div class="max-w-5xl mx-auto px-6 fade-in">
+                <header class="text-center mb-16">
+                    <p class="eyebrow text-xs font-semibold uppercase tracking-widest mb-3">Desafío INNSPIRA: Viabilidad e Impacto</p>
+                    <h2 class="headline-gradient text-4xl md:text-5xl font-bold tracking-tighter mb-4">El Factor Tiempo es Mortal.</h2>
+                    <p class="text-apple-gray max-w-xl mx-auto font-light">
+                        Análisis de la distancia recorrida a ciegas por un vehículo antes de que el conductor logre reaccionar bajo condiciones de visibilidad reducida en el sur de Chile.
+                    </p>
+                </header>
+
+                <div class="glass glow-card relative overflow-hidden rounded-[2.5rem] p-8 md:p-12">
+
+                    <!-- Indicadores Clave de Riesgo (KPIs Reales) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-12 text-left">
+                        <div class="border-l-2 border-red-500 pl-4 transition-transform duration-500 hover:translate-x-1">
+                            <h3 class="text-xs text-apple-gray uppercase tracking-widest font-bold">Mortalidad Vial</h3>
+                            <p class="text-3xl font-bold mt-1 text-white">1.5 s</p>
+                            <p class="text-xs text-apple-gray mt-1">Tiempo promedio de percepción y reacción humana en carretera con clima adverso.</p>
+                        </div>
+
+                        <div class="border-l-2 border-orange-500 pl-4 transition-transform duration-500 hover:translate-x-1">
+                            <h3 class="text-xs text-apple-gray uppercase tracking-widest font-bold">Distancia Crítica</h3>
+                            <p class="text-3xl font-bold mt-1 text-white">42 mt</p>
+                            <p class="text-xs text-apple-gray mt-1">Recorridos a ciegas a 100 km/h antes de que el chofer siquiera toque el freno.</p>
+                        </div>
+
+                        <div class="border-l-2 border-cyan-500 pl-4 transition-transform duration-500 hover:translate-x-1">
+                            <h3 class="text-xs text-apple-gray uppercase tracking-widest font-bold">Ventaja EVI-Cap</h3>
+                            <p class="text-3xl font-bold mt-1 text-cyan-400">&lt; 25 ms</p>
+                            <p class="text-xs text-apple-gray mt-1">Detección por microondas y propagación de red que gana metros de vida para la cuadrilla.</p>
+                        </div>
+                    </div>
+
+                    <!-- Contenedor del Gráfico Estadístico -->
+                    <div class="h-80 w-full mb-8 relative z-10">
+                        <canvas id="trafficChart" role="img" aria-label="Gráfico comparativo de distancia de reacción humana frente al margen de evacuación de EVI-Cap"></canvas>
+                    </div>
+
+                    <!-- Botón de Comparación Dinámica -->
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-white/5 relative z-10">
+                        <p class="text-xs text-apple-gray max-w-md text-center sm:text-left font-light">
+                            * Fuente: Modelado matemático de frenado de emergencia basado en los reportes anuales de siniestralidad en zonas de obras de CONASET.
+                        </p>
+                        <button type="button" id="btn-metric" class="btn-fluid bg-white text-black hover:bg-gray-200 shadow-[0_0_20px_rgba(255,255,255,0.2)] px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap">
+                            Ver Datos de Velocidad vs Distancia
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-10 text-center text-apple-gray text-xs border-t border-white/10 bg-black/40 backdrop-blur-xl relative z-10">
         <p>EVI-Cap Proyecto IIoT. Desarrollado por estudiantes de la UCT.</p>
     </footer>
 
-    <!-- 1. Carga de librerías externas -->
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    
-    <!-- 2. Archivo de lógica local aplanado -->
-    <script src="app.js"></script>
+    <!-- Librerías externas (defer: no bloquean el render) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        /* ==================================================================
+           1. REVELADO PROGRESIVO (fade-in-up al entrar en viewport)
+           ================================================================== */
+        const revealables = document.querySelectorAll('.fade-in');
+
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+            revealables.forEach((el) => observer.observe(el));
+        } else {
+            revealables.forEach((el) => el.classList.add('in-view'));
+        }
+
+        /* ==================================================================
+           2. MICRO-INTERACCIÓN: resplandor que sigue al cursor en tarjetas
+           ================================================================== */
+        document.querySelectorAll('.glow-card').forEach((card) => {
+            card.addEventListener('pointermove', (event) => {
+                const rect = card.getBoundingClientRect();
+                card.style.setProperty('--mx', `${event.clientX - rect.left}px`);
+                card.style.setProperty('--my', `${event.clientY - rect.top}px`);
+            });
+            card.addEventListener('pointerleave', () => {
+                card.style.removeProperty('--mx');
+                card.style.removeProperty('--my');
+            });
+        });
+
+        /* ==================================================================
+           3. SELECTOR DE PESTAÑAS (Hardware / Redes / Energía)
+           ================================================================== */
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabPanels  = document.querySelectorAll('.tab-content');
+
+        const activateTab = (button) => {
+            const panel = document.getElementById(button.dataset.target);
+            if (!panel) return;
+
+            tabButtons.forEach((btn) => {
+                btn.classList.remove('active', 'bg-white/10', 'text-white');
+                btn.classList.add('text-apple-gray', 'hover:text-white');
+                btn.setAttribute('aria-selected', 'false');
+            });
+
+            button.classList.add('active', 'bg-white/10', 'text-white');
+            button.classList.remove('text-apple-gray', 'hover:text-white');
+            button.setAttribute('aria-selected', 'true');
+
+            tabPanels.forEach((p) => {
+                p.classList.add('hidden');
+                p.classList.remove('animate-fade-in-fast');
+            });
+
+            panel.classList.remove('hidden');
+            void panel.offsetWidth; // reinicia la animación de entrada
+            panel.classList.add('animate-fade-in-fast');
+        };
+
+        tabButtons.forEach((button) => button.addEventListener('click', () => activateTab(button)));
+
+        /* ==================================================================
+           4. VISOR 3D: barra de carga, filtros de cámara y Modo Diagnóstico
+           ================================================================== */
+        const viewer = document.getElementById('hero-model');
+        const stage  = document.getElementById('viewer-stage');
+
+        if (viewer) {
+            // Barra de progreso de carga del modelo
+            viewer.addEventListener('progress', (event) => {
+                const bar     = viewer.querySelector('.progress-bar');
+                const updater = viewer.querySelector('.update-bar');
+                if (!bar || !updater) return;
+
+                updater.style.width = `${event.detail.totalProgress * 100}%`;
+                bar.classList.toggle('hide', event.detail.totalProgress === 1);
+            });
+
+            const camButtons = document.querySelectorAll('.cam-btn[data-orbit]');
+            const resetBtn   = document.getElementById('btn-reset-cam');
+            const diagBtn    = document.getElementById('btn-diagnostic');
+
+            const clearActive = () => camButtons.forEach((b) => b.classList.remove('active'));
+
+            // Vistas predefinidas de cámara (interpolación suave nativa de model-viewer)
+            camButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    clearActive();
+                    button.classList.add('active');
+                    button.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+
+                    viewer.removeAttribute('auto-rotate');
+                    viewer.cameraOrbit  = button.dataset.orbit;
+                    viewer.cameraTarget = button.dataset.target;
+                    viewer.fieldOfView  = button.dataset.fov;
+                });
+            });
+
+            // Reset: devuelve encuadre por defecto y reactiva el giro automático
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    clearActive();
+                    viewer.cameraOrbit  = 'auto auto auto';
+                    viewer.cameraTarget = 'auto auto auto';
+                    viewer.fieldOfView  = 'auto';
+                    viewer.resetTurntableRotation(0);
+                    viewer.setAttribute('auto-rotate', '');
+                });
+            }
+
+            // Modo Diagnóstico: retícula, barrido y anotaciones ancladas al modelo
+            if (diagBtn && stage) {
+                diagBtn.addEventListener('click', () => {
+                    const active = stage.classList.toggle('diagnostic');
+
+                    diagBtn.classList.toggle('diag-on', active);
+                    diagBtn.setAttribute('aria-pressed', String(active));
+
+                    viewer.exposure = active ? '1.6' : '1.2';
+                    viewer.shadowIntensity = active ? '0.3' : '1';
+
+                    if (active) {
+                        viewer.removeAttribute('auto-rotate');
+                    } else {
+                        viewer.setAttribute('auto-rotate', '');
+                    }
+                });
+            }
+        }
+
+        /* ==================================================================
+           5. MENÚ MÓVIL — hamburguesa animada
+           ================================================================== */
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (menuToggle && mobileMenu) {
+            const closeMobileMenu = () => {
+                menuToggle.classList.remove('is-open');
+                menuToggle.setAttribute('aria-expanded', 'false');
+                mobileMenu.style.maxHeight = '0px';
+            };
+
+            menuToggle.addEventListener('click', () => {
+                const isOpen = menuToggle.classList.toggle('is-open');
+                menuToggle.setAttribute('aria-expanded', String(isOpen));
+                mobileMenu.style.maxHeight = isOpen ? `${mobileMenu.scrollHeight}px` : '0px';
+            });
+
+            mobileMenu.querySelectorAll('.mobile-link').forEach((link) => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 768) closeMobileMenu();
+            });
+        }
+
+        /* ==================================================================
+           6. TERMINAL HUD — consola de telemetría estilo industrial/militar
+           ================================================================== */
+        const hudLog = document.getElementById('hud-log');
+        let triggerHudAlertSequence = null;
+
+        if (hudLog) {
+            const LED = {
+                ok:    '<span class="led led-ok" aria-hidden="true"></span>',
+                warn:  '<span class="led led-warn" aria-hidden="true"></span>',
+                alert: '<span class="led led-alert" aria-hidden="true"></span>'
+            };
+            const TEXT_COLOR = {
+                ok:    'text-cyan-300/90',
+                warn:  'text-orange-400',
+                alert: 'text-[#ff6961]'
+            };
+
+            const timestamp = () => new Date().toLocaleTimeString('es-CL', { hour12: false });
+
+            const hudLine = (message, level = 'ok') => {
+                const line = document.createElement('div');
+                line.className = 'term-log-line flex items-start gap-2';
+                line.innerHTML = `${LED[level] || LED.ok}<span class="text-white/30 shrink-0">[${timestamp()}]</span><span class="${TEXT_COLOR[level] || TEXT_COLOR.ok}">${message}</span>`;
+                hudLog.appendChild(line);
+
+                // Mantiene el buffer acotado y desplaza al último evento
+                while (hudLog.children.length > 60) hudLog.removeChild(hudLog.firstChild);
+                hudLog.scrollTop = hudLog.scrollHeight;
+            };
+
+            const ROUTINE_EVENTS = [
+                'RADAR_HB100 :: barrido Doppler nominal',
+                'MESH_SYNC :: 8/8 nodos respondiendo heartbeat',
+                'ESP-NOW :: enlace peer-to-peer estable',
+                'BATERIA :: celda LiFePO4 dentro de rango operativo',
+                'EDGE_AI :: clasificación de vector de tráfico OK',
+                'GPS :: posición de nodo confirmada',
+                'WATCHDOG :: ciclo de integridad de firmware OK'
+            ];
+
+            hudLine('BOOT :: sistema EVI-Cap inicializado', 'ok');
+            hudLine('RADAR_HB100 :: calibración 10.5 GHz completa', 'ok');
+            hudLine('MESH_SYNC :: handshake con 8 nodos exitoso', 'ok');
+
+            const hudInterval = setInterval(() => {
+                const msg = ROUTINE_EVENTS[Math.floor(Math.random() * ROUTINE_EVENTS.length)];
+                hudLine(msg, 'ok');
+            }, 3200);
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) clearInterval(hudInterval);
+            });
+
+            // Secuencia disparada por el botón "Simular invasión vehicular"
+            triggerHudAlertSequence = () => {
+                hudLine('INTRUSION_VECTOR :: objeto móvil detectado en berma', 'warn');
+                setTimeout(() => hudLine('ESP-NOW :: broadcast difundido → pulsera_04', 'warn'), 250);
+                setTimeout(() => hudLine('HAPTIC_ALERT :: vibración despachada (&lt; 25 ms)', 'alert'), 550);
+                setTimeout(() => hudLine('STATUS :: cuadrilla notificada — zona asegurada', 'ok'), 3600);
+            };
+        }
+
+        /* ==================================================================
+           7. WIDGET DE ESTADO EN VIVO (telemetría simulada del nodo)
+           ================================================================== */
+        const beacon      = document.getElementById('status-beacon');
+        const statusPing  = document.getElementById('status-ping');
+        const statusLabel = document.getElementById('status-label');
+        const simulateBtn = document.getElementById('btn-simulate');
+        const telDoppler  = document.getElementById('tel-doppler');
+        const telNodes    = document.getElementById('tel-nodes');
+        const telLatency  = document.getElementById('tel-latency');
+        const telBattery  = document.getElementById('tel-battery');
+
+        if (beacon && statusLabel && telDoppler) {
+            let alertMode = false;
+            let battery   = 96;
+
+            const NORMAL_HTML = 'Estado: Operativo <span class="text-white/25 mx-1">|</span> Red Mesh: Conectada (10.5 GHz)';
+            const ALERT_HTML  = 'Estado: Invasión detectada <span class="text-white/25 mx-1">|</span> Alerta háptica difundida por ESP-NOW';
+
+            // Reinicia la animación de entrada del valor para dar sensación de refresco
+            const setValue = (node, value) => {
+                node.textContent = value;
+                node.classList.remove('ticker-value');
+                void node.offsetWidth;
+                node.classList.add('ticker-value');
+            };
+
+            const refreshTelemetry = () => {
+                if (alertMode) {
+                    // Frecuencia Doppler alta: vehículo aproximándose a la berma
+                    setValue(telDoppler, `${(Math.random() * (4.8 - 3.1) + 3.1).toFixed(1)} kHz`);
+                    setValue(telLatency, `${Math.floor(Math.random() * (24 - 14) + 14)} ms`);
+                } else {
+                    // Tráfico normal en pistas centrales
+                    setValue(telDoppler, `${(Math.random() * 1.2).toFixed(1)} kHz`);
+                    setValue(telLatency, `${Math.floor(Math.random() * (22 - 11) + 11)} ms`);
+                }
+
+                setValue(telNodes, `${Math.random() > 0.92 ? 7 : 8} / 8`);
+
+                battery = Math.max(88, battery - (Math.random() > 0.75 ? 1 : 0));
+                setValue(telBattery, `${battery} %`);
+            };
+
+            const telemetryTimer = setInterval(refreshTelemetry, 2200);
+            refreshTelemetry();
+
+            // Pausa la simulación cuando la pestaña no está visible (ahorro de CPU)
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) clearInterval(telemetryTimer);
+            });
+
+            if (simulateBtn) {
+                simulateBtn.addEventListener('click', () => {
+                    if (alertMode) return;
+                    alertMode = true;
+
+                    // Simulación háptica: vibra el dispositivo físico si el navegador lo soporta
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate([200, 100, 200, 100, 400]);
+                    }
+
+                    if (typeof triggerHudAlertSequence === 'function') {
+                        triggerHudAlertSequence();
+                    }
+
+                    statusLabel.innerHTML = ALERT_HTML;
+                    beacon.classList.remove('bg-signal-green', 'beacon');
+                    beacon.classList.add('bg-signal-red', 'beacon-alert');
+                    if (statusPing) statusPing.classList.replace('bg-signal-green', 'bg-signal-red');
+                    telLatency.classList.remove('text-cyan-400');
+                    telLatency.classList.add('text-signal-red');
+                    simulateBtn.disabled = true;
+                    simulateBtn.classList.add('opacity-40', 'pointer-events-none');
+                    refreshTelemetry();
+
+                    // Restaura la vigilancia estable en ruta
+                    setTimeout(() => {
+                        alertMode = false;
+                        statusLabel.innerHTML = NORMAL_HTML;
+                        beacon.classList.remove('bg-signal-red', 'beacon-alert');
+                        beacon.classList.add('bg-signal-green', 'beacon');
+                        if (statusPing) statusPing.classList.replace('bg-signal-red', 'bg-signal-green');
+                        telLatency.classList.remove('text-signal-red');
+                        telLatency.classList.add('text-cyan-400');
+                        simulateBtn.disabled = false;
+                        simulateBtn.classList.remove('opacity-40', 'pointer-events-none');
+                        refreshTelemetry();
+                    }, 3500);
+                });
+            }
+        }
+
+        /* ==================================================================
+           8. GRÁFICO ESTADÍSTICO DE VALIDACIÓN DE IMPACTO (Chart.js)
+           ================================================================== */
+        const canvas = document.getElementById('trafficChart');
+
+        if (canvas && typeof Chart !== 'undefined') {
+            const ctx = canvas.getContext('2d');
+            let currentView = 'reaction'; // Controla el estado del botón de métricas
+
+            // Configuración inicial: Metros recorridos a ciegas por velocidad
+            const speedLabels = ['80 km/h', '100 km/h', '120 km/h (Límite Máx)'];
+
+            // Datos calculados: Distancia de reacción humana (1.5 s) vs metros ganados por EVI-Cap
+            const humanReactionDistance = [33, 42, 50]; // metros recorridos antes de frenar
+            const eviCapSafetyMargin    = [28, 37, 45]; // metros de advertencia anticipada salvados
+
+            const trafficChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: speedLabels,
+                    datasets: [
+                        {
+                            label: 'Distancia de Reacción Humana (Metros a ciegas)',
+                            data: humanReactionDistance,
+                            backgroundColor: 'rgba(255, 69, 58, 0.25)', // Rojo sutil
+                            borderColor: '#ff453a',                     // Rojo sólido
+                            borderWidth: 1.5,
+                            borderRadius: 8,
+                            barPercentage: 0.6
+                        },
+                        {
+                            label: 'Margen de Evacuación Salvado por EVI-Cap (Metros)',
+                            data: eviCapSafetyMargin,
+                            backgroundColor: 'rgba(6, 182, 212, 0.25)', // Cian sutil
+                            borderColor: '#06b6d4',                     // Cian sólido
+                            borderWidth: 1.5,
+                            borderRadius: 8,
+                            barPercentage: 0.6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 700, easing: 'easeOutQuart' },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: '#86868b', font: { family: 'Inter', size: 12 }, usePointStyle: true, boxWidth: 8 }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(20, 20, 22, 0.92)',
+                            borderColor: 'rgba(255, 255, 255, 0.10)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 12,
+                            titleFont: { family: 'Inter', size: 12 },
+                            bodyFont: { family: 'Inter', size: 12 },
+                            displayColors: false,
+                            callbacks: {
+                                label: (context) => ` ${context.dataset.label}: ${context.raw} metros`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            border: { display: false },
+                            ticks: {
+                                color: '#86868b',
+                                font: { family: 'Inter', size: 11 },
+                                callback: (value) => value + ' m'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Distancia Crítica en Carretera',
+                                color: '#86868b',
+                                font: { family: 'Inter', size: 11 }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            border: { display: false },
+                            ticks: { color: '#ffffff', font: { family: 'Inter', size: 12, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Cambio dinámico del set de datos para la demostración en vivo
+            const metricButton = document.getElementById('btn-metric');
+
+            if (metricButton) {
+                metricButton.addEventListener('click', () => {
+                    if (currentView === 'reaction') {
+                        // Vista alternativa: Distribución de Causas de Accidentes en Obras según CONASET
+                        trafficChart.data.labels = ['Exceso de Velocidad', 'Condición Climática / Niebla', 'Distracción al Volante'];
+                        trafficChart.data.datasets[0].label = '% Incidencia en Siniestros Fatales';
+                        trafficChart.data.datasets[0].data = [45, 35, 20]; // Porcentajes promedio ponderados
+                        trafficChart.data.datasets[0].borderColor = '#f97316'; // Naranja de advertencia vial
+                        trafficChart.data.datasets[0].backgroundColor = 'rgba(249, 115, 22, 0.2)';
+
+                        // Oculta el segundo dataset temporalmente para esta métrica
+                        trafficChart.data.datasets[1].data = [];
+
+                        trafficChart.options.scales.y.ticks.callback = (value) => value + '%';
+                        trafficChart.options.scales.y.title.text = 'Porcentaje de Siniestralidad Vial';
+
+                        metricButton.textContent = 'Ver Distancias de Frenado';
+                        currentView = 'stats';
+                    } else {
+                        // Vuelve a la vista de metros de reacción inicial
+                        trafficChart.data.labels = speedLabels;
+                        trafficChart.data.datasets[0].label = 'Distancia de Reacción Humana (Metros a ciegas)';
+                        trafficChart.data.datasets[0].data = humanReactionDistance;
+                        trafficChart.data.datasets[0].borderColor = '#ff453a';
+                        trafficChart.data.datasets[0].backgroundColor = 'rgba(255, 69, 58, 0.25)';
+
+                        trafficChart.data.datasets[1].label = 'Margen de Evacuación Salvado por EVI-Cap (Metros)';
+                        trafficChart.data.datasets[1].data = eviCapSafetyMargin;
+
+                        trafficChart.options.scales.y.ticks.callback = (value) => value + ' m';
+                        trafficChart.options.scales.y.title.text = 'Distancia Crítica en Carretera';
+
+                        metricButton.textContent = 'Ver Datos de Causas de Accidentes';
+                        currentView = 'reaction';
+                    }
+
+                    trafficChart.update();
+                });
+            }
+        }
+
+        /* ==================================================================
+           9. RED MESH INTERACTIVA (Nodos con forma de conos de tránsito)
+           ================================================================== */
+        const meshContainer = document.getElementById('particles-mesh');
+
+        if (meshContainer && typeof particlesJS !== 'undefined') {
+            // Vector SVG de cono estilizado en cian de alta definición mapeado para Particles.js
+            const coneSvgUri = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='38,22 62,22 82,80 18,80' stroke='%2306b6d4' stroke-width='6' fill='none' stroke-linejoin='round'/><line x1='10' y1='87' x2='90' y2='87' stroke='%2306b6d4' stroke-width='9' stroke-linecap='round'/><line x1='32' y1='44' x2='68' y2='44' stroke='%2306b6d4' stroke-width='5'/><line x1='25' y1='63' x2='75' y2='63' stroke='%2306b6d4' stroke-width='5'/></svg>";
+
+            particlesJS('particles-mesh', {
+                particles: {
+                    number: { value: 30, density: { enable: true, value_area: 900 } },
+                    color: { value: '#06b6d4' },
+                    /* Los nodos son imágenes vectoriales (conos de tránsito) */
+                    shape: {
+                        type: 'image',
+                        image: { src: coneSvgUri, width: 100, height: 100 }
+                    },
+                    opacity: { value: 0.9, random: false },
+                    /* Tamaño escalado para que la silueta del cono sea legible */
+                    size: { value: 22, random: true, anim: { enable: false } },
+                    line_linked: { enable: true, distance: 180, color: '#06b6d4', opacity: 0.5, width: 1.5 },
+                    move: {
+                        enable: true,
+                        speed: 1.0, // Flotación lenta y tecnológica estilo radar vial
+                        direction: 'none',
+                        random: true,
+                        straight: false,
+                        out_mode: 'out',
+                        bounce: false
+                    }
+                },
+                interactivity: {
+                    detect_on: 'canvas',
+                    events: {
+                        onhover: { enable: true, mode: 'grab' },  // El entramado se amarra al cursor
+                        onclick: { enable: true, mode: 'push' },  // Despliega un cono extra al hacer clic
+                        resize: true
+                    },
+                    modes: {
+                        grab: { distance: 220, line_linked: { opacity: 0.95 } }
+                    }
+                },
+                retina_detect: true
+            });
+        }
+    });
+    </script>
 </body>
 </html>
