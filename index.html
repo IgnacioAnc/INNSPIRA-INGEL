@@ -366,6 +366,7 @@
                 <li><a href="#solucion" class="link-fluid hover:text-white">Solución</a></li>
                 <li><a href="#tecnologia" class="link-fluid hover:text-white">Especificaciones</a></li>
                 <li><a href="#prototipo" class="link-fluid hover:text-white">Prototipo</a></li>
+                <li><a href="#equipo" class="link-fluid hover:text-white">Equipo</a></li>
             </ul>
 
             <div class="flex items-center gap-3">
@@ -804,6 +805,85 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- 5. EL EQUIPO (Nosotros) -->
+        <section id="equipo" class="py-32 relative overflow-hidden border-t border-white/5">
+            <!-- Background glow específico para el equipo -->
+            <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-64 bg-cyan-500/10 blur-[120px] rounded-full mix-blend-screen"></div>
+            </div>
+
+            <div class="max-w-5xl mx-auto px-6 relative z-10 fade-in">
+                <header class="text-center mb-20">
+                    <p class="eyebrow text-xs font-semibold uppercase tracking-widest mb-3">Equipo Fundador</p>
+                    <h2 class="headline-gradient text-4xl md:text-5xl font-bold tracking-tighter mb-4">Ingeniería desde el Sur.</h2>
+                    <p class="text-apple-gray max-w-2xl mx-auto font-light text-lg leading-relaxed">
+                        Somos estudiantes de la Universidad Católica de Temuco. Combinamos electrónica de hardware, telecomunicaciones y análisis de sistemas para construir tecnología industrial que salva vidas.
+                    </p>
+                </header>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                    <!-- Integrante 1: Ignacio -->
+                    <article class="glass glow-card fade-in delay-100 flex flex-col items-center text-center p-8 rounded-[2rem]">
+                        <div class="w-24 h-24 rounded-full bg-white/5 border border-white/10 mb-5 flex items-center justify-center overflow-hidden relative group">
+                            <!-- Si tienes fotos, reemplaza el div de abajo por un <img> -->
+                            <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <span class="text-2xl font-bold text-white/50 group-hover:text-cyan-400 transition-colors duration-300">IA</span>
+                        </div>
+                        <h3 class="text-white font-bold text-lg tracking-tight mb-1">Ignacio Ancamil</h3>
+                        <p class="text-apple-gray text-xs font-mono tracking-widest uppercase mb-4 text-cyan-400/80">Líder de Proyecto</p>
+                        <p class="text-apple-gray font-light text-sm">Arquitectura de hardware IoT, diseño de PCB y firmware en tiempo real (FreeRTOS).</p>
+                    </article>
+
+                    <!-- Integrante 2: Claudio -->
+                    <article class="glass glow-card fade-in delay-150 flex flex-col items-center text-center p-8 rounded-[2rem]">
+                        <div class="w-24 h-24 rounded-full bg-white/5 border border-white/10 mb-5 flex items-center justify-center overflow-hidden relative group">
+                            <div class="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <span class="text-2xl font-bold text-white/50 group-hover:text-orange-400 transition-colors duration-300">CF</span>
+                        </div>
+                        <h3 class="text-white font-bold text-lg tracking-tight mb-1">Claudio Ferrada</h3>
+                        <p class="text-apple-gray text-xs font-mono tracking-widest uppercase mb-4 text-orange-400/80">Ingeniero de Redes</p>
+                        <p class="text-apple-gray font-light text-sm">Implementación del protocolo ESP-NOW y topología de red Mesh de latencia ultra baja.</p>
+                    </article>
+
+                    <!-- Integrante 3: Alexander -->
+                    <article class="glass glow-card fade-in delay-200 flex flex-col items-center text-center p-8 rounded-[2rem]">
+                        <div class="w-24 h-24 rounded-full bg-white/5 border border-white/10 mb-5 flex items-center justify-center overflow-hidden relative group">
+                            <div class="absolute inset-0 bg-gradient-to-br from-signal-green/20 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <span class="text-2xl font-bold text-white/50 group-hover:text-signal-green transition-colors duration-300">AG</span>
+                        </div>
+                        <h3 class="text-white font-bold text-lg tracking-tight mb-1">Alexander Gutierrez</h3>
+                        <p class="text-apple-gray text-xs font-mono tracking-widest uppercase mb-4 text-signal-green/80">Diseño Mecánico</p>
+                        <p class="text-apple-gray font-light text-sm">Modelado 3D, empaquetadura IP67 y ergonomía industrial de la pulsera háptica.</p>
+                    </article>
+
+                    <!-- Integrante 4: Bryan -->
+                    <article class="glass glow-card fade-in delay-300 flex flex-col items-center text-center p-8 rounded-[2rem]">
+                        <div class="w-24 h-24 rounded-full bg-white/5 border border-white/10 mb-5 flex items-center justify-center overflow-hidden relative group">
+                            <div class="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <span class="text-2xl font-bold text-white/50 group-hover:text-blue-400 transition-colors duration-300">BP</span>
+                        </div>
+                        <h3 class="text-white font-bold text-lg tracking-tight mb-1">Bryan Perez</h3>
+                        <p class="text-apple-gray text-xs font-mono tracking-widest uppercase mb-4 text-blue-400/80">Telemetría y Datos</p>
+                        <p class="text-apple-gray font-light text-sm">Integración Cloud, interfaz web (Gemelo Digital) y análisis de señales del radar.</p>
+                    </article>
+
+                </div>
+
+                <!-- Footer del bloque Equipo (Opcional: llamado a la acción) -->
+                <div class="mt-16 flex justify-center fade-in delay-300">
+                    <div class="glass flex items-center gap-4 px-6 py-3 rounded-full border border-white/10">
+                        <span class="relative flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
+                        </span>
+                        <span class="text-sm font-medium text-white tracking-wide">Preparados para el pilotaje comercial</span>
+                    </div>
+                </div>
+
             </div>
         </section>
     </main>
