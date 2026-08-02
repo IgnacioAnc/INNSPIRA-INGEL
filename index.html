@@ -7,354 +7,29 @@
     <meta name="description" content="EVI-Cap: sistema IIoT modular para conos de tránsito. Detección por radar de microondas a través de la niebla y alerta háptica en milisegundos.">
     <meta name="theme-color" content="#09090b">
 
-    <!-- Fuente Inter (Imita la tipografía SF Pro de Apple) + JetBrains Mono (HUD) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Tipografía auto-hospedada: elimina 2 conexiones externas (fonts.googleapis
+         + fonts.gstatic) que en 3G cuestan ~500 ms antes de pintar texto. -->
+    <link rel="preload" href="inter-var-latin.woff2" as="font" type="font/woff2" crossorigin>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- CSS único y precompilado. Antes: cdn.tailwindcss.com (~400 KB de JS que
+         generaba las clases en el navegador en cada carga, bloqueando el hilo). -->
+    <link rel="stylesheet" href="evicap.css">
 
-    <!-- Configuración para emular colores de Apple + acentos futuristas cian/naranja -->
+    <!-- Las librerías pesadas se piden solo cuando su sección se acerca a pantalla.
+         Se resuelve el DNS por adelantado para que no cueste al momento de pedirlas. -->
+    <link rel="dns-prefetch" href="https://ajax.googleapis.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'ui-monospace', 'monospace']
-                    },
-                    colors: {
-                        apple: {
-                            black: '#000000',
-                            dark: '#1d1d1f',
-                            gray: '#86868b',
-                            light: '#f5f5f7',
-                            blue: '#2997ff'
-                        },
-                        signal: {
-                            cyan: '#00f3ff',
-                            amber: '#ff9500',
-                            red: '#ff453a',
-                            green: '#30d158'
-                        }
-                    }
-                }
-            }
-        };
         /* Marca que JS está activo: evita que el contenido quede invisible si el JS falla */
         document.documentElement.classList.add('js-anim');
     </script>
-
-    <!-- Model-Viewer (módulo: se difiere automáticamente) -->
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
-
-    <!-- Hoja de estilos local -->
-    <link rel="stylesheet" href="styles.css">
-
-    <style>
-        /* ==========================================================================
-           MOTION SYSTEM — curvas y transiciones estilo Apple
-           ========================================================================== */
-        :root {
-            --ease-apple: cubic-bezier(0.22, 1, 0.36, 1);
-            --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
-            --glow-cyan: rgba(6, 182, 212, 0.30);
-            --glow-orange: rgba(249, 115, 22, 0.30);
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translate3d(0, 28px, 0); }
-            to   { opacity: 1; transform: translate3d(0, 0, 0); }
-        }
-        @keyframes fadeInFast {
-            from { opacity: 0; transform: translate3d(0, 8px, 0); }
-            to   { opacity: 1; transform: translate3d(0, 0, 0); }
-        }
-
-        .js-anim .fade-in { opacity: 0; will-change: opacity, transform; }
-        .js-anim .fade-in.in-view { animation: fadeInUp 0.9s var(--ease-apple) both; }
-
-        /* Escalonado (animation-delay: no colisiona con el transition-delay de Tailwind) */
-        .fade-in.delay-100 { animation-delay: 0.10s; }
-        .fade-in.delay-150 { animation-delay: 0.15s; }
-        .fade-in.delay-200 { animation-delay: 0.20s; }
-        .fade-in.delay-300 { animation-delay: 0.30s; }
-
-        .animate-fade-in-fast { animation: fadeInFast 0.35s var(--ease-soft) both; }
-
-        /* ==========================================================================
-           TIPOGRAFÍA — degradados metálicos/neón estilo keynote de hardware
-           ========================================================================== */
-        .headline-gradient {
-            background-image: linear-gradient(90deg, #ffffff 0%, #e2e8f0 45%, #94a3b8 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 1px 60px rgba(255, 255, 255, 0.08);
-        }
-        .headline-accent {
-            background-image: linear-gradient(120deg, #06b6d4 0%, #67e8f9 45%, #ffffff 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .eyebrow {
-            background-image: linear-gradient(90deg, #f97316, #fb923c);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        /* ==========================================================================
-           GLASSMORPHISM ELEVADO + GLOW EN HOVER (tarjetas glow-card)
-           ========================================================================== */
-        .glass {
-            background-color: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(24px) saturate(160%);
-            -webkit-backdrop-filter: blur(24px) saturate(160%);
-            border: 1px solid rgba(255, 255, 255, 0.10);
-            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
-                        0 24px 60px -20px rgba(0, 0, 0, 0.80);
-        }
-
-        /* Tarjeta con resplandor que sigue al cursor (--mx / --my se inyectan por JS) */
-        .glow-card {
-            position: relative;
-            isolation: isolate;
-            transition: transform 0.5s var(--ease-apple),
-                        border-color 0.5s var(--ease-soft),
-                        background-color 0.5s var(--ease-soft),
-                        box-shadow 0.5s var(--ease-soft);
-        }
-        .glow-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 0%), var(--glow-cyan), transparent 65%);
-            opacity: 0;
-            transition: opacity 0.5s var(--ease-soft);
-            pointer-events: none;
-            z-index: -1;
-        }
-        /* Filo superior brillante, como el chaflán pulido de un unibody */
-        .glow-card::after {
-            content: '';
-            position: absolute;
-            inset-inline: 12%;
-            top: -1px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
-            opacity: 0;
-            transition: opacity 0.5s var(--ease-soft);
-            pointer-events: none;
-        }
-        .glow-card:hover {
-            transform: translateY(-6px); /* equivalente a hover:-translate-y-1.5 */
-            border-color: rgba(6, 182, 212, 0.40);
-            background-color: rgba(255, 255, 255, 0.05);
-            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
-                        0 30px 70px -22px rgba(6, 182, 212, 0.18),
-                        0 24px 60px -20px rgba(0, 0, 0, 0.85);
-        }
-        .glow-card:hover::before,
-        .glow-card:hover::after { opacity: 1; }
-
-        .glow-amber::before { background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 0%), var(--glow-orange), transparent 65%); }
-        .glow-amber:hover { border-color: rgba(249, 115, 22, 0.40); }
-
-        /* ==========================================================================
-           CONTROLES — micro-interacciones
-           ========================================================================== */
-        .btn-fluid {
-            transition: background-color 0.35s var(--ease-soft),
-                        color 0.35s var(--ease-soft),
-                        box-shadow 0.35s var(--ease-soft),
-                        border-color 0.35s var(--ease-soft),
-                        transform 0.25s var(--ease-apple);
-        }
-        .btn-fluid:hover  { transform: translateY(-1px); }
-        .btn-fluid:active { transform: scale(0.96); }
-
-        .btn-glow:hover { box-shadow: 0 0 0 1px rgba(255,255,255,0.16), 0 8px 28px -6px var(--glow-cyan); }
-
-        .link-fluid { transition: color 0.3s var(--ease-soft), opacity 0.3s var(--ease-soft); }
-
-        /* Oculta la barra de scroll pero conserva el desplazamiento táctil */
-        .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-
-        /* ==========================================================================
-           MENÚ MÓVIL — hamburguesa animada
-           ========================================================================== */
-        #menu-toggle.is-open .hamburger-line:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
-        #menu-toggle.is-open .hamburger-line:nth-child(2) { opacity: 0; transform: scaleX(0); }
-        #menu-toggle.is-open .hamburger-line:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
-
-        #mobile-menu { max-height: 0px; }
-
-        /* ==========================================================================
-           WIDGET DE TELEMETRÍA EN VIVO
-           ========================================================================== */
-        @keyframes beacon {
-            0%, 100% { opacity: 1;   box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.55); }
-            50%      { opacity: 0.55; box-shadow: 0 0 0 7px rgba(48, 209, 88, 0); }
-        }
-        .beacon { animation: beacon 1.8s var(--ease-soft) infinite; }
-        .beacon-alert { animation: beacon 0.6s var(--ease-soft) infinite; box-shadow: 0 0 0 0 rgba(255, 69, 58, 0.55); }
-
-        @keyframes tickerFade {
-            from { opacity: 0; transform: translateY(4px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .ticker-value { animation: tickerFade 0.35s var(--ease-soft) both; }
-
-        /* ==========================================================================
-           TERMINAL HUD DE TELEMETRÍA — estética industrial / militar
-           ========================================================================== */
-        .led {
-            display: inline-block;
-            width: 7px;
-            height: 7px;
-            border-radius: 9999px;
-            margin-top: 3px;
-            flex-shrink: 0;
-        }
-        .led-ok    { background: #30d158; box-shadow: 0 0 6px rgba(48, 209, 88, 0.85); }
-        .led-warn  { background: #f97316; box-shadow: 0 0 6px rgba(249, 115, 22, 0.85); }
-        .led-alert { background: #ff453a; box-shadow: 0 0 6px rgba(255, 69, 58, 0.85); }
-
-        @keyframes cursorBlink {
-            0%, 49%  { opacity: 1; }
-            50%, 100% { opacity: 0; }
-        }
-        .term-cursor { animation: cursorBlink 1s steps(1, start) infinite; }
-        .term-log-line { animation: tickerFade 0.35s var(--ease-soft) both; }
-
-        /* ==========================================================================
-           MODEL-VIEWER — escenario, HUD y modo diagnóstico
-           ========================================================================== */
-        model-viewer {
-            width: 100%;
-            height: 100%;
-            background-color: transparent;
-            --poster-color: transparent;
-            outline: none;
-        }
-
-        .progress-bar { transition: opacity 0.5s var(--ease-soft); }
-        .progress-bar.hide { visibility: hidden; opacity: 0; }
-
-        /* Retícula técnica que solo aparece en Modo Diagnóstico */
-        .diag-grid {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.6s var(--ease-soft);
-            background-image:
-                linear-gradient(rgba(6, 182, 212, 0.10) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(6, 182, 212, 0.10) 1px, transparent 1px);
-            background-size: 48px 48px;
-            mask-image: radial-gradient(circle at 50% 50%, #000 35%, transparent 78%);
-            -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 35%, transparent 78%);
-        }
-        #viewer-stage.diagnostic .diag-grid { opacity: 1; }
-
-        @keyframes scanSweep {
-            0%   { transform: translateY(-10%); opacity: 0; }
-            15%  { opacity: 1; }
-            85%  { opacity: 1; }
-            100% { transform: translateY(760%); opacity: 0; }
-        }
-        .diag-scan {
-            position: absolute;
-            inset-inline: 0;
-            top: 0;
-            height: 8%;
-            pointer-events: none;
-            opacity: 0;
-            background: linear-gradient(180deg, transparent, rgba(6, 182, 212, 0.18), transparent);
-        }
-        #viewer-stage.diagnostic .diag-scan { opacity: 1; animation: scanSweep 4.5s linear infinite; }
-
-        /* Anotaciones técnicas ancladas al modelo 3D */
-        .hotspot {
-            --hs: rgba(6, 182, 212, 0.9);
-            display: block;
-            width: 14px;
-            height: 14px;
-            border-radius: 9999px;
-            border: 1px solid var(--hs);
-            background: rgba(6, 182, 212, 0.18);
-            box-shadow: 0 0 14px rgba(6, 182, 212, 0.55);
-            opacity: 0;
-            pointer-events: none;
-            transform: scale(0.6);
-            transition: opacity 0.45s var(--ease-soft), transform 0.45s var(--ease-apple);
-        }
-        #viewer-stage.diagnostic .hotspot { opacity: 1; transform: scale(1); pointer-events: auto; }
-        .hotspot[data-visible="false"] { opacity: 0; pointer-events: none; }
-
-        .hotspot-label {
-            position: absolute;
-            left: 22px;
-            top: -8px;
-            white-space: nowrap;
-            font-family: 'JetBrains Mono', ui-monospace, monospace;
-            font-size: 9px;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: #d9fbff;
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(6, 182, 212, 0.30);
-            border-radius: 9999px;
-            padding: 5px 10px;
-        }
-
-        /* Estado activo de los filtros de cámara */
-        .cam-btn.active {
-            background-color: rgba(255, 255, 255, 0.16);
-            color: #ffffff;
-            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.18);
-        }
-        .cam-btn.diag-on {
-            background-color: rgba(6, 182, 212, 0.16);
-            color: #9ff4ff;
-            border-color: rgba(6, 182, 212, 0.45);
-            box-shadow: 0 0 20px -4px rgba(6, 182, 212, 0.7);
-        }
-
-        /* Accesibilidad y preferencias del sistema */
-        :focus-visible {
-            outline: 2px solid #06b6d4;
-            outline-offset: 3px;
-            border-radius: 9999px;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-                scroll-behavior: auto !important;
-            }
-            .js-anim .fade-in { opacity: 1; }
-            .glow-card:hover, .btn-fluid:hover { transform: none; }
-        }
-    </style>
 </head>
 <body class="bg-[#09090b] text-apple-light font-sans antialiased selection:bg-cyan-500 selection:text-white">
 
-    <!-- AMBIENT GLOW BACKGROUND (Esferas de luz difuminadas cian / naranja) -->
-    <div class="fixed inset-0 -z-10 pointer-events-none overflow-hidden" aria-hidden="true">
-        <div class="absolute top-[-18%] left-[-12%] w-[58vw] h-[58vw] bg-cyan-500/20 blur-[140px] opacity-20 rounded-full mix-blend-screen"></div>
-        <div class="absolute bottom-[-14%] right-[-12%] w-[52vw] h-[52vw] bg-orange-500/20 blur-[140px] opacity-20 rounded-full mix-blend-screen"></div>
-        <div class="absolute top-[38%] right-[18%] w-[28vw] h-[28vw] bg-cyan-500/10 blur-[140px] opacity-20 rounded-full mix-blend-screen"></div>
-    </div>
+    <!-- AMBIENT GLOW BACKGROUND (degradado radial: mismo aspecto que las 3 esferas
+         con blur(140px), sin obligar al GPU a desenfocar 3 capas gigantes) -->
+    <div class="ambient" aria-hidden="true"></div>
 
     <!-- NAVEGACIÓN (Cristal esmerilado + menú móvil desplegable) -->
     <header class="fixed inset-x-0 top-0 z-50 bg-[#09090b]/70 backdrop-blur-2xl backdrop-saturate-150 border-b border-white/10">
@@ -485,14 +160,15 @@
                 </div>
             </div>
 
-            <!-- VISUALIZADOR 3D OFICIAL (Estilo Apple Hardware Showcase, adaptativo en móviles) -->
+            <!-- VISOR 3D OFICIAL (Estilo Apple Hardware Showcase, adaptativo en móviles)
+                 El modelo pasó de 12.3 MB a 626 KB y su motor (model-viewer, ~1 MB)
+                 solo se descarga cuando el visor se acerca al viewport. -->
             <div id="viewer-stage" class="relative w-full max-w-4xl min-h-[420px] h-[70vh] md:h-[600px] mt-8 mx-auto fade-in delay-200">
 
                 <model-viewer
                     id="hero-model"
-                    src="https://ignacioanc.github.io/INNSPIRA-INGEL/Meshy_AI_EVI_CAP_Solar_Cap_0718080318_generate.glb" 
+                    data-src="evicap-model.glb"
                     alt="Prototipo Industrial EVI-Cap IIoT"
-                    loading="lazy"
                     reveal="auto"
                     auto-rotate
                     rotation-per-second="18deg"
@@ -533,10 +209,19 @@
 
                     <!-- Indicador de asistencia técnica para móviles -->
                     <div slot="ar-prompt" id="ar-prompt" class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <img src="https://modelviewer.dev/shared-assets/icons/hand.png" alt="" loading="lazy" decoding="async" class="w-12 h-12 animate-bounce opacity-70">
+                        <img src="https://modelviewer.dev/shared-assets/icons/hand.png" alt="" width="48" height="48" loading="lazy" decoding="async" class="w-12 h-12 animate-bounce opacity-70">
                     </div>
 
                 </model-viewer>
+
+                <!-- Marco de carga: ocupa el sitio del visor para que no salte el layout -->
+                <div id="viewer-skeleton" class="viewer-skeleton">
+                    <div class="skel-ring" aria-hidden="true"></div>
+                    <p class="font-mono text-[10px] tracking-[0.2em] uppercase text-apple-gray">Inicializando gemelo digital</p>
+                    <button type="button" id="btn-load-3d" class="hidden btn-fluid bg-white/10 border border-white/20 hover:border-cyan-500/40 text-white text-xs font-semibold px-5 py-2 rounded-full">
+                        Cargar modelo 3D (626 KB)
+                    </button>
+                </div>
 
                 <!-- Retícula y barrido del Modo Diagnóstico -->
                 <div class="diag-grid rounded-[2rem]" aria-hidden="true"></div>
@@ -577,7 +262,7 @@
         </section>
 
         <!-- 1. EL DESAFÍO (Glassmorphism Cards) -->
-        <section id="desafio" class="py-32">
+        <section id="desafio" class="py-32 defer-paint">
             <div class="max-w-5xl mx-auto px-6">
                 <header class="text-center mb-16 fade-in">
                     <h2 class="text-4xl md:text-6xl font-bold tracking-tighter">
@@ -600,7 +285,7 @@
         </section>
 
         <!-- 2. LA SOLUCIÓN (Grid Premium con Contenedores de Hardware a Gran Escala) -->
-        <section id="solucion" class="py-32">
+        <section id="solucion" class="py-32 defer-paint">
             <div class="max-w-5xl mx-auto px-6 text-center">
                 <h2 class="text-4xl md:text-6xl font-bold tracking-tighter mb-20 fade-in">
                     <span class="headline-gradient">Tres pasos.</span><br><span class="text-apple-gray">Milisegundos para reaccionar.</span>
@@ -611,8 +296,12 @@
                     <!-- Radar -->
                     <article class="glass glow-card fade-in delay-100 group p-10 rounded-[2.5rem] flex flex-col items-center">
                         <div class="relative w-44 h-44 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mb-8 shadow-inner">
-                            <div class="absolute inset-0 bg-cyan-500/10 blur-xl rounded-full opacity-50 group-hover:opacity-90 transition-opacity duration-500" aria-hidden="true"></div>
-                            <img src="radar.png" alt="Módulo Radar HB100" loading="lazy" decoding="async" class="relative z-10 h-32 w-32 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-700 ease-out group-hover:scale-105">
+                            <div class="deco-glow absolute inset-0 text-cyan-500/20 bg-cyan-500/10 blur-xl rounded-full opacity-50 group-hover:opacity-90 transition-opacity duration-500" aria-hidden="true"></div>
+                            <picture>
+                                <source type="image/avif" srcset="radar-256.avif 256w, radar-384.avif 384w" sizes="128px">
+                                <source type="image/webp" srcset="radar-256.webp 256w, radar-384.webp 384w" sizes="128px">
+                                <img src="radar-384.png" alt="Módulo Radar HB100" width="384" height="254" loading="lazy" decoding="async" class="relative z-10 h-32 w-32 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-700 ease-out group-hover:scale-105">
+                            </picture>
                         </div>
                         <h3 class="headline-accent font-bold text-2xl mb-3">10.5 GHz</h3>
                         <p class="text-apple-gray text-base font-light leading-relaxed">El Radar Doppler monitorea variaciones de frecuencia a 30 metros de distancia continua.</p>
@@ -621,8 +310,12 @@
                     <!-- ESP32 -->
                     <article class="glass glow-card fade-in delay-200 group p-10 rounded-[2.5rem] flex flex-col items-center">
                         <div class="relative w-44 h-44 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mb-8 shadow-inner">
-                            <div class="absolute inset-0 bg-cyan-500/10 blur-xl rounded-full opacity-50 group-hover:opacity-90 transition-opacity duration-500" aria-hidden="true"></div>
-                            <img src="esp32.png" alt="Microcontrolador ESP32-S3" loading="lazy" decoding="async" class="relative z-10 h-32 w-32 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-700 ease-out group-hover:scale-105">
+                            <div class="deco-glow absolute inset-0 text-cyan-500/20 bg-cyan-500/10 blur-xl rounded-full opacity-50 group-hover:opacity-90 transition-opacity duration-500" aria-hidden="true"></div>
+                            <picture>
+                                <source type="image/avif" srcset="esp32-256.avif 256w, esp32-384.avif 384w" sizes="128px">
+                                <source type="image/webp" srcset="esp32-256.webp 256w, esp32-384.webp 384w" sizes="128px">
+                                <img src="esp32-384.png" alt="Microcontrolador ESP32-S3" width="384" height="283" loading="lazy" decoding="async" class="relative z-10 h-32 w-32 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-700 ease-out group-hover:scale-105">
+                            </picture>
                         </div>
                         <h3 class="headline-accent font-bold text-2xl mb-3">Edge AI</h3>
                         <p class="text-apple-gray text-base font-light leading-relaxed">El ESP32-S3 procesa vectores, distinguiendo el tráfico normal de una intrusión en la berma.</p>
@@ -631,8 +324,12 @@
                     <!-- Pulsera -->
                     <article class="glass glow-card glow-amber fade-in delay-300 group p-10 rounded-[2.5rem] flex flex-col items-center">
                         <div class="relative w-44 h-44 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mb-8 shadow-inner">
-                            <div class="absolute inset-0 bg-orange-500/10 blur-xl rounded-full opacity-50 group-hover:opacity-90 transition-opacity duration-500" aria-hidden="true"></div>
-                            <img src="pulsera.png" alt="Pulsera Háptica de Alerta" loading="lazy" decoding="async" class="relative z-10 h-32 w-32 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-700 ease-out group-hover:scale-105">
+                            <div class="deco-glow absolute inset-0 text-orange-500/20 bg-orange-500/10 blur-xl rounded-full opacity-50 group-hover:opacity-90 transition-opacity duration-500" aria-hidden="true"></div>
+                            <picture>
+                                <source type="image/avif" srcset="pulsera-256.avif 256w, pulsera-384.avif 384w" sizes="128px">
+                                <source type="image/webp" srcset="pulsera-256.webp 256w, pulsera-384.webp 384w" sizes="128px">
+                                <img src="pulsera-384.png" alt="Pulsera Háptica de Alerta" width="384" height="283" loading="lazy" decoding="async" class="relative z-10 h-32 w-32 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-700 ease-out group-hover:scale-105">
+                            </picture>
                         </div>
                         <h3 class="font-bold text-2xl mb-3 text-white">&lt; 25 ms</h3>
                         <p class="text-apple-gray text-base font-light leading-relaxed">Transmisión peer-to-peer (ESP-NOW) que hace vibrar la pulsera del trabajador al instante.</p>
@@ -643,13 +340,23 @@
         </section>
 
         <!-- SHOWCASE VISUAL (Cinematic Edge-to-Edge Fade) -->
-        <section class="py-20 overflow-hidden" aria-label="Despliegue en terreno">
+        <section class="py-20 overflow-hidden defer-paint" aria-label="Despliegue en terreno">
             <div class="relative w-full min-h-[60vh] md:min-h-[80vh] flex items-end">
 
-                <img src="render_vial.png"
-                     alt="EVI-Cap desplegado en ruta concesionaria"
-                     loading="lazy" decoding="async"
-                     class="absolute inset-0 w-full h-full object-cover object-center opacity-60">
+                <!-- 5.6 MB de PNG -> 5 KB en móvil / 17 KB en escritorio, misma imagen -->
+                <picture>
+                    <source type="image/avif"
+                            srcset="render_vial-640.avif 640w, render_vial-960.avif 960w, render_vial-1440.avif 1440w, render_vial-1920.avif 1920w"
+                            sizes="100vw">
+                    <source type="image/webp"
+                            srcset="render_vial-640.webp 640w, render_vial-960.webp 960w, render_vial-1440.webp 1440w, render_vial-1920.webp 1920w"
+                            sizes="100vw">
+                    <img src="render_vial-1440.jpg"
+                         alt="EVI-Cap desplegado en ruta concesionaria"
+                         width="1440" height="785"
+                         loading="lazy" decoding="async"
+                         class="absolute inset-0 w-full h-full object-cover object-center opacity-60">
+                </picture>
 
                 <!-- Degradados de fusión con el fondo (superior, inferior y laterales) -->
                 <div class="absolute inset-x-0 top-0 h-32 md:h-48 bg-gradient-to-b from-[#09090b] to-transparent z-10" aria-hidden="true"></div>
@@ -677,14 +384,16 @@
             </div>
         </section>
 
-        <!-- FONDO INTERACTIVO DE RED MESH -->
-        <section class="relative w-full h-[600px] md:h-[800px] overflow-hidden border-y border-white/10 bg-black/20 backdrop-blur-sm" aria-label="Red mesh de nodos EVI-Cap">
+        <!-- FONDO INTERACTIVO DE RED MESH
+             particles.js solo se descarga e inicia cuando la sección entra en
+             pantalla, y su bucle de animación se congela al salir de ella. -->
+        <section id="mesh-section" class="relative w-full h-[600px] md:h-[800px] overflow-hidden border-y border-white/10 bg-black/20 backdrop-blur-sm" aria-label="Red mesh de nodos EVI-Cap">
             <div id="particles-mesh" class="absolute inset-0 w-full h-full z-0"></div>
 
             <!-- ZONA PROTEGIDA -->
             <div class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
                 <div class="relative flex flex-col items-center pointer-events-auto transition-transform duration-500 hover:scale-110">
-                    <div class="absolute top-4 w-32 h-32 bg-orange-500/20 rounded-full blur-2xl animate-pulse mix-blend-screen" aria-hidden="true"></div>
+                    <div class="deco-glow absolute top-4 w-32 h-32 text-orange-500/20 bg-orange-500/20 rounded-full blur-2xl animate-pulse" aria-hidden="true"></div>
                     <svg class="w-20 h-20 text-orange-500 drop-shadow-[0_0_12px_rgba(249,115,22,0.8)] relative z-20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.8" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" class="opacity-20 text-white"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.5c-3.5 0-5.5 2-5.5 3.5v1h11v-1c0-1.5-2-3.5-5.5-3.5z"/>
@@ -701,7 +410,7 @@
         </section>
 
         <!-- 3. ESPECIFICACIONES -->
-        <section id="tecnologia" class="py-32">
+        <section id="tecnologia" class="py-32 defer-paint">
             <div class="max-w-3xl mx-auto px-6 fade-in">
                 <h2 class="headline-gradient text-4xl font-bold tracking-tighter text-center mb-16">Arquitectura Pro.</h2>
 
@@ -756,7 +465,8 @@
             </div>
         </section>
 
-        <!-- 4. VALIDACIÓN DE IMPACTO (Métricas Reales CONASET / INNSPIRA) -->
+        <!-- 4. VALIDACIÓN DE IMPACTO (Métricas Reales CONASET / INNSPIRA)
+             Chart.js (~200 KB) se descarga solo al acercarse esta sección. -->
         <section id="prototipo" class="py-32">
             <div class="max-w-5xl mx-auto px-6 fade-in">
                 <header class="text-center mb-16">
@@ -809,10 +519,10 @@
         </section>
 
         <!-- 5. EL EQUIPO (Nosotros) -->
-        <section id="equipo" class="py-32 relative overflow-hidden border-t border-white/5">
+        <section id="equipo" class="py-32 relative overflow-hidden border-t border-white/5 defer-paint">
             <!-- Background glow específico para el equipo -->
             <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-64 bg-cyan-500/10 blur-[120px] rounded-full mix-blend-screen"></div>
+                <div class="deco-glow absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-64 text-cyan-500/10 bg-cyan-500/10 blur-[120px] rounded-full"></div>
             </div>
 
             <div class="max-w-5xl mx-auto px-6 relative z-10 fade-in">
@@ -820,7 +530,7 @@
                     <p class="eyebrow text-xs font-semibold uppercase tracking-widest mb-3">Equipo Fundador</p>
                     <h2 class="headline-gradient text-4xl md:text-5xl font-bold tracking-tighter mb-4">Ingeniería desde el Sur.</h2>
                     <p class="text-apple-gray max-w-2xl mx-auto font-light text-lg leading-relaxed">
-                        Somos estudiantes de Ingeniería Eléctrica de la Universidad Católica de Temuco. Combinamos electrónica de hardware, telecomunicaciones y análisis de sistemas para construir tecnología industrial que salva vidas.
+                        Somos estudiantes de la Universidad Católica de Temuco. Combinamos electrónica de hardware, telecomunicaciones y análisis de sistemas para construir tecnología industrial que salva vidas.
                     </p>
                 </header>
 
@@ -892,12 +602,58 @@
         <p>EVI-Cap Proyecto IIoT. Desarrollado por estudiantes de la UCT.</p>
     </footer>
 
-    <!-- Librerías externas (defer: no bloquean el render) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
-
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    (() => {
+        'use strict';
+
+        /* ==================================================================
+           0. UTILIDADES DE CARGA DIFERIDA
+           Ninguna librería externa se descarga al abrir la página: cada una
+           espera a que su sección esté a punto de entrar en pantalla.
+           ================================================================== */
+        const conn = navigator.connection || {};
+        const SAVE_DATA = conn.saveData === true;
+        const SLOW_NET  = /^(slow-2g|2g)$/.test(conn.effectiveType || '');
+        const LOW_END   = (navigator.hardwareConcurrency || 8) <= 4 ||
+                          (navigator.deviceMemory || 8) <= 2;
+        const COARSE    = window.matchMedia('(pointer: coarse)').matches;
+
+        const scriptCache = new Map();
+        const loadScript = (src, isModule) => {
+            if (scriptCache.has(src)) return scriptCache.get(src);
+            const p = new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = src;
+                if (isModule) s.type = 'module'; else s.async = true;
+                s.onload = resolve;
+                s.onerror = () => reject(new Error('No se pudo cargar ' + src));
+                document.head.appendChild(s);
+            });
+            scriptCache.set(src, p);
+            return p;
+        };
+
+        // Ejecuta el callback una sola vez, cuando el elemento se acerca al viewport
+        const onceInView = (el, callback, rootMargin = '400px') => {
+            if (!el) return;
+            if (!('IntersectionObserver' in window)) { callback(); return; }
+            const io = new IntersectionObserver((entries) => {
+                if (entries.some((e) => e.isIntersecting)) {
+                    io.disconnect();
+                    callback();
+                }
+            }, { rootMargin });
+            io.observe(el);
+        };
+
+        // Congela las animaciones CSS infinitas de una sección mientras no se ve
+        const pauseWhenHidden = (el) => {
+            if (!el || !('IntersectionObserver' in window)) return;
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach((e) => el.classList.toggle('anim-idle', !e.isIntersecting));
+            }, { rootMargin: '150px' });
+            io.observe(el);
+        };
 
         /* ==================================================================
            1. REVELADO PROGRESIVO (fade-in-up al entrar en viewport)
@@ -910,6 +666,11 @@
                     if (entry.isIntersecting) {
                         entry.target.classList.add('in-view');
                         observer.unobserve(entry.target);
+                        // Libera la capa de composición al terminar la animación:
+                        // dejar will-change fijo en 20 elementos satura la GPU.
+                        entry.target.addEventListener('animationend', () => {
+                            entry.target.classList.add('anim-done');
+                        }, { once: true });
                     }
                 });
             }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
@@ -921,18 +682,30 @@
 
         /* ==================================================================
            2. MICRO-INTERACCIÓN: resplandor que sigue al cursor en tarjetas
+           En táctil no hay cursor: no se registran los listeners (ahorra
+           trabajo por cada dedo que se mueve sobre la pantalla).
            ================================================================== */
-        document.querySelectorAll('.glow-card').forEach((card) => {
-            card.addEventListener('pointermove', (event) => {
-                const rect = card.getBoundingClientRect();
-                card.style.setProperty('--mx', `${event.clientX - rect.left}px`);
-                card.style.setProperty('--my', `${event.clientY - rect.top}px`);
+        if (!COARSE) {
+            document.querySelectorAll('.glow-card').forEach((card) => {
+                let ticking = false;
+                card.addEventListener('pointermove', (event) => {
+                    if (ticking) return;
+                    ticking = true;
+                    // El cálculo se agrupa en el siguiente frame para no forzar
+                    // un reflow sincrónico por cada movimiento del ratón.
+                    requestAnimationFrame(() => {
+                        const rect = card.getBoundingClientRect();
+                        card.style.setProperty('--mx', `${event.clientX - rect.left}px`);
+                        card.style.setProperty('--my', `${event.clientY - rect.top}px`);
+                        ticking = false;
+                    });
+                }, { passive: true });
+                card.addEventListener('pointerleave', () => {
+                    card.style.removeProperty('--mx');
+                    card.style.removeProperty('--my');
+                }, { passive: true });
             });
-            card.addEventListener('pointerleave', () => {
-                card.style.removeProperty('--mx');
-                card.style.removeProperty('--my');
-            });
-        });
+        }
 
         /* ==================================================================
            3. SELECTOR DE PESTAÑAS (Hardware / Redes / Energía)
@@ -967,12 +740,63 @@
         tabButtons.forEach((button) => button.addEventListener('click', () => activateTab(button)));
 
         /* ==================================================================
-           4. VISOR 3D: barra de carga, filtros de cámara y Modo Diagnóstico
+           4. VISOR 3D: carga diferida, barra de progreso, filtros de cámara
+              y Modo Diagnóstico
            ================================================================== */
-        const viewer = document.getElementById('hero-model');
-        const stage  = document.getElementById('viewer-stage');
+        const MODEL_VIEWER_SRC = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js';
+        const viewer   = document.getElementById('hero-model');
+        const stage    = document.getElementById('viewer-stage');
+        const skeleton = document.getElementById('viewer-skeleton');
+        const loadBtn  = document.getElementById('btn-load-3d');
 
-        if (viewer) {
+        if (viewer && stage) {
+            let booted = false;
+
+            const bootViewer = () => {
+                if (booted) return;
+                booted = true;
+                if (loadBtn) loadBtn.classList.add('hidden');
+
+                loadScript(MODEL_VIEWER_SRC, true)
+                    .then(() => customElements.whenDefined('model-viewer'))
+                    .then(() => {
+                        // El modelo va comprimido con EXT_meshopt_compression
+                        // (12.3 MB -> 626 KB). model-viewer trae el soporte pero
+                        // no registra el decodificador salvo que se le indique
+                        // dónde está; se sirve local (25 KB) para no depender
+                        // de un CDN externo ni del wasm de Draco (~250 KB).
+                        const MV = customElements.get('model-viewer');
+                        if (MV) MV.meshoptDecoderLocation = 'meshopt_decoder.js';
+
+                        viewer.src = viewer.dataset.src;
+                        // Oculta el marco de carga cuando el modelo ya está en pantalla
+                        viewer.addEventListener('load', () => {
+                            if (skeleton) skeleton.classList.add('hide');
+                        }, { once: true });
+                        setTimeout(() => skeleton && skeleton.classList.add('hide'), 8000);
+                    })
+                    .catch(() => {
+                        if (skeleton) {
+                            skeleton.innerHTML =
+                                '<p class="font-mono text-[10px] tracking-[0.2em] uppercase text-apple-gray">' +
+                                'Visor 3D no disponible sin conexión</p>';
+                        }
+                    });
+            };
+
+            // Con ahorro de datos o red 2G se espera un toque del usuario:
+            // así nadie paga 1 MB de motor 3D sin quererlo.
+            if (SAVE_DATA || SLOW_NET) {
+                if (loadBtn) {
+                    loadBtn.classList.remove('hidden');
+                    loadBtn.addEventListener('click', bootViewer);
+                }
+                const label = skeleton && skeleton.querySelector('p');
+                if (label) label.textContent = 'Gemelo digital listo para cargar';
+            } else {
+                onceInView(stage, bootViewer, '600px');
+            }
+
             // Barra de progreso de carga del modelo
             viewer.addEventListener('progress', (event) => {
                 const bar     = viewer.querySelector('.progress-bar');
@@ -992,6 +816,7 @@
             // Vistas predefinidas de cámara (interpolación suave nativa de model-viewer)
             camButtons.forEach((button) => {
                 button.addEventListener('click', () => {
+                    bootViewer();
                     clearActive();
                     button.classList.add('active');
                     button.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
@@ -1006,18 +831,20 @@
             // Reset: devuelve encuadre por defecto y reactiva el giro automático
             if (resetBtn) {
                 resetBtn.addEventListener('click', () => {
+                    bootViewer();
                     clearActive();
                     viewer.cameraOrbit  = 'auto auto auto';
                     viewer.cameraTarget = 'auto auto auto';
                     viewer.fieldOfView  = 'auto';
-                    viewer.resetTurntableRotation(0);
+                    if (viewer.resetTurntableRotation) viewer.resetTurntableRotation(0);
                     viewer.setAttribute('auto-rotate', '');
                 });
             }
 
             // Modo Diagnóstico: retícula, barrido y anotaciones ancladas al modelo
-            if (diagBtn && stage) {
+            if (diagBtn) {
                 diagBtn.addEventListener('click', () => {
+                    bootViewer();
                     const active = stage.classList.toggle('diagnostic');
 
                     diagBtn.classList.toggle('diag-on', active);
@@ -1032,6 +859,24 @@
                         viewer.setAttribute('auto-rotate', '');
                     }
                 });
+            }
+
+            // El giro automático quema GPU aunque el visor esté fuera de pantalla
+            if ('IntersectionObserver' in window) {
+                let wasRotating = true;
+                new IntersectionObserver((entries) => {
+                    entries.forEach((e) => {
+                        if (!booted) return;
+                        if (e.isIntersecting) {
+                            if (wasRotating && !stage.classList.contains('diagnostic')) {
+                                viewer.setAttribute('auto-rotate', '');
+                            }
+                        } else {
+                            wasRotating = viewer.hasAttribute('auto-rotate');
+                            viewer.removeAttribute('auto-rotate');
+                        }
+                    });
+                }, { rootMargin: '100px' }).observe(stage);
             }
         }
 
@@ -1058,10 +903,34 @@
                 link.addEventListener('click', closeMobileMenu);
             });
 
+            // resize dispara decenas de veces al girar el teléfono o abrir el
+            // teclado: se agrupa en un solo cálculo.
+            let resizeTimer;
             window.addEventListener('resize', () => {
-                if (window.innerWidth >= 768) closeMobileMenu();
-            });
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    if (window.innerWidth >= 768) closeMobileMenu();
+                }, 150);
+            }, { passive: true });
         }
+
+        /* ==================================================================
+           TEMPORIZADORES CON PAUSA REAL
+           Antes los setInterval se cancelaban al ocultar la pestaña y no
+           volvían nunca: la telemetría quedaba congelada al regresar.
+           ================================================================== */
+        const timers = [];
+        const addTimer = (fn, ms) => {
+            const t = { fn, ms, id: setInterval(fn, ms) };
+            timers.push(t);
+            return t;
+        };
+        document.addEventListener('visibilitychange', () => {
+            timers.forEach((t) => {
+                clearInterval(t.id);
+                t.id = document.hidden ? null : setInterval(t.fn, t.ms);
+            });
+        });
 
         /* ==================================================================
            6. TERMINAL HUD — consola de telemetría estilo industrial/militar
@@ -1089,8 +958,9 @@
                 line.innerHTML = `${LED[level] || LED.ok}<span class="text-white/30 shrink-0">[${timestamp()}]</span><span class="${TEXT_COLOR[level] || TEXT_COLOR.ok}">${message}</span>`;
                 hudLog.appendChild(line);
 
-                // Mantiene el buffer acotado y desplaza al último evento
-                while (hudLog.children.length > 60) hudLog.removeChild(hudLog.firstChild);
+                // Buffer más corto: 60 nodos en el DOM con animación viva pesan
+                // en gama baja y ninguno es visible más allá de los últimos ~10.
+                while (hudLog.children.length > 24) hudLog.removeChild(hudLog.firstChild);
                 hudLog.scrollTop = hudLog.scrollHeight;
             };
 
@@ -1108,14 +978,10 @@
             hudLine('RADAR_HB100 :: calibración 10.5 GHz completa', 'ok');
             hudLine('MESH_SYNC :: handshake con 8 nodos exitoso', 'ok');
 
-            const hudInterval = setInterval(() => {
+            addTimer(() => {
                 const msg = ROUTINE_EVENTS[Math.floor(Math.random() * ROUTINE_EVENTS.length)];
                 hudLine(msg, 'ok');
             }, 3200);
-
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) clearInterval(hudInterval);
-            });
 
             // Secuencia disparada por el botón "Simular invasión vehicular"
             triggerHudAlertSequence = () => {
@@ -1170,13 +1036,8 @@
                 setValue(telBattery, `${battery} %`);
             };
 
-            const telemetryTimer = setInterval(refreshTelemetry, 2200);
+            addTimer(refreshTelemetry, 2200);
             refreshTelemetry();
-
-            // Pausa la simulación cuando la pestaña no está visible (ahorro de CPU)
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) clearInterval(telemetryTimer);
-            });
 
             if (simulateBtn) {
                 simulateBtn.addEventListener('click', () => {
@@ -1221,10 +1082,11 @@
 
         /* ==================================================================
            8. GRÁFICO ESTADÍSTICO DE VALIDACIÓN DE IMPACTO (Chart.js)
+              Se descarga al acercarse la sección, no al abrir la página.
            ================================================================== */
         const canvas = document.getElementById('trafficChart');
 
-        if (canvas && typeof Chart !== 'undefined') {
+        const initChart = () => {
             const ctx = canvas.getContext('2d');
             let currentView = 'reaction'; // Controla el estado del botón de métricas
 
@@ -1263,7 +1125,13 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animation: { duration: 700, easing: 'easeOutQuart' },
+                    // Chart.js redibuja en cada resize; agruparlo evita tirones
+                    // al girar el teléfono o al aparecer la barra del navegador.
+                    resizeDelay: 150,
+                    // En equipos modestos se dibuja a 1x en vez de 3x: el mismo
+                    // gráfico con hasta 9 veces menos píxeles que rasterizar.
+                    devicePixelRatio: LOW_END ? 1 : Math.min(window.devicePixelRatio || 1, 2),
+                    animation: LOW_END ? false : { duration: 700, easing: 'easeOutQuart' },
                     plugins: {
                         legend: {
                             position: 'top',
@@ -1350,20 +1218,37 @@
                     trafficChart.update();
                 });
             }
+        };
+
+        if (canvas) {
+            onceInView(canvas.closest('section'), () => {
+                loadScript('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js')
+                    .then(() => { if (typeof Chart !== 'undefined') initChart(); })
+                    .catch(() => {});
+            }, '300px');
         }
 
         /* ==================================================================
            9. RED MESH INTERACTIVA (Nodos con forma de conos de tránsito)
+              Se carga al llegar a la sección y su bucle se detiene al salir.
            ================================================================== */
         const meshContainer = document.getElementById('particles-mesh');
+        const meshSection   = document.getElementById('mesh-section');
 
-        if (meshContainer && typeof particlesJS !== 'undefined') {
+        const initMesh = () => {
             // Vector SVG de cono estilizado en cian de alta definición mapeado para Particles.js
             const coneSvgUri = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='38,22 62,22 82,80 18,80' stroke='%2306b6d4' stroke-width='6' fill='none' stroke-linejoin='round'/><line x1='10' y1='87' x2='90' y2='87' stroke='%2306b6d4' stroke-width='9' stroke-linecap='round'/><line x1='32' y1='44' x2='68' y2='44' stroke='%2306b6d4' stroke-width='5'/><line x1='25' y1='63' x2='75' y2='63' stroke='%2306b6d4' stroke-width='5'/></svg>";
 
+            // Se mantiene en 30 como el original: particles.js ya escala el
+            // número por área de lienzo (density), así que en un teléfono de
+            // 390px salen ~7 conos solos. Bajarlo aquí dejaría la malla vacía.
+            // El coste real en móvil no era el número de nodos, sino el
+            // filtro drop-shadow del canvas y retina_detect, ya corregidos.
+            const nodeCount = LOW_END ? 22 : 30;
+
             particlesJS('particles-mesh', {
                 particles: {
-                    number: { value: 30, density: { enable: true, value_area: 900 } },
+                    number: { value: nodeCount, density: { enable: true, value_area: 900 } },
                     color: { value: '#06b6d4' },
                     /* Los nodos son imágenes vectoriales (conos de tránsito) */
                     shape: {
@@ -1387,18 +1272,52 @@
                 interactivity: {
                     detect_on: 'canvas',
                     events: {
-                        onhover: { enable: true, mode: 'grab' },  // El entramado se amarra al cursor
-                        onclick: { enable: true, mode: 'push' },  // Despliega un cono extra al hacer clic
+                        onhover: { enable: !COARSE, mode: 'grab' },  // El entramado se amarra al cursor
+                        onclick: { enable: true, mode: 'push' },     // Despliega un cono extra al hacer clic
                         resize: true
                     },
                     modes: {
                         grab: { distance: 220, line_linked: { opacity: 0.95 } }
                     }
                 },
-                retina_detect: true
+                // retina_detect dibuja a 3x en móviles: 9 veces más píxeles por
+                // frame para un fondo decorativo. Solo se activa en escritorio.
+                retina_detect: !COARSE && !LOW_END
             });
+
+            // Detiene el bucle requestAnimationFrame mientras la sección no se ve:
+            // sin esto, particles.js sigue calculando 60 veces por segundo
+            // durante todo el resto de la página.
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver((entries) => {
+                    const pJS = window.pJSDom && window.pJSDom[0] && window.pJSDom[0].pJS;
+                    if (!pJS) return;
+                    entries.forEach((e) => {
+                        if (e.isIntersecting) {
+                            if (!pJS.tmp.__running) {
+                                pJS.tmp.__running = true;
+                                pJS.fn.vendors.draw();
+                            }
+                        } else if (pJS.tmp.__running !== false) {
+                            pJS.tmp.__running = false;
+                            cancelAnimationFrame(pJS.fn.drawAnimFrame);
+                        }
+                    });
+                }, { rootMargin: '100px' });
+                io.observe(meshSection);
+            }
+        };
+
+        if (meshContainer && meshSection) {
+            onceInView(meshSection, () => {
+                loadScript('https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js')
+                    .then(() => { if (typeof particlesJS !== 'undefined') initMesh(); })
+                    .catch(() => {});
+            }, '250px');
+
+            pauseWhenHidden(meshSection);
         }
-    });
+    })();
     </script>
 </body>
 </html>
